@@ -107,10 +107,11 @@ import { SITE } from "@/config";
                     <button 
                       type="button"
                       id="rewrite-title-btn"
-                      class="px-3 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors text-sm"
+                      class="px-3 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors text-sm flex items-center gap-1"
                       title="AI Rewrite Title"
                     >
-                      🎯
+                      <i class="fas fa-magic"></i>
+                      <span class="hidden sm:inline">AI</span>
                     </button>
                   </div>
                 </div>
@@ -139,10 +140,11 @@ import { SITE } from "@/config";
                   <button 
                     type="button"
                     id="rewrite-description-btn"
-                    class="px-3 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors text-sm"
+                    class="px-3 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors text-sm flex items-center gap-1"
                     title="AI Rewrite Description"
                   >
-                    📝
+                    <i class="fas fa-edit"></i>
+                    <span class="hidden sm:inline">AI</span>
                   </button>
                 </div>
               </div>
@@ -153,36 +155,38 @@ import { SITE } from "@/config";
                   <!-- Editor Toolbar -->
                   <div class="bg-muted border-b border-border p-2 flex flex-wrap gap-2">
                     <button type="button" class="editor-btn" data-action="bold" title="Bold">
-                      <strong>𝐁</strong>
+                      <i class="fas fa-bold"></i>
                     </button>
                     <button type="button" class="editor-btn" data-action="italic" title="Italic">
-                      <em>𝐼</em>
+                      <i class="fas fa-italic"></i>
                     </button>
                     <button type="button" class="editor-btn" data-action="heading" title="Heading">
-                      📄
+                      <i class="fas fa-heading"></i>
                     </button>
                     <button type="button" class="editor-btn" data-action="link" title="Link">
-                      🔗
+                      <i class="fas fa-link"></i>
                     </button>
                     <button type="button" class="editor-btn" data-action="list" title="List">
-                      📋
+                      <i class="fas fa-list-ul"></i>
                     </button>
                     <button type="button" class="editor-btn" data-action="quote" title="Quote">
-                      💭
+                      <i class="fas fa-quote-left"></i>
                     </button>
                     <div class="border-l border-border mx-2"></div>
                     <button type="button" id="upload-image-btn" class="editor-btn" title="Upload Image">
-                      🖼️
+                      <i class="fas fa-image"></i>
                     </button>
                     <button type="button" id="upload-video-btn" class="editor-btn" title="Upload Video">
-                      🎥
+                      <i class="fas fa-video"></i>
                     </button>
                     <div class="border-l border-border mx-2"></div>
-                    <button type="button" id="ai-rewrite-content-btn" class="editor-btn bg-purple-500 text-white" title="AI Rewrite Selection">
-                      🔥 AI
+                    <button type="button" id="ai-rewrite-content-btn" class="editor-btn bg-purple-500 text-white flex items-center gap-1" title="AI Rewrite Selection">
+                      <i class="fas fa-robot"></i>
+                      <span class="hidden sm:inline">AI</span>
                     </button>
-                    <button type="button" id="ai-improve-btn" class="editor-btn bg-blue-500 text-white" title="AI Improve Content">
-                      ⚡ Enhance
+                    <button type="button" id="ai-improve-btn" class="editor-btn bg-blue-500 text-white flex items-center gap-1" title="AI Improve Content">
+                      <i class="fas fa-bolt"></i>
+                      <span class="hidden sm:inline">Enhance</span>
                     </button>
                   </div>
                   
@@ -310,12 +314,25 @@ import { SITE } from "@/config";
 
       <!-- AI Processing Modal -->
       <div id="ai-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-background border border-border rounded-lg p-6 max-w-md w-full mx-4">
-          <div class="text-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
-            <h3 class="text-lg font-semibold text-foreground mb-2">AI Processing</h3>
-            <p class="text-foreground/60">Enhancing your content...</p>
+        <div class="bg-background border border-border rounded-lg p-8 max-w-md w-full mx-4 text-center">
+          <div class="relative mb-6">
+            <div class="animate-spin rounded-full h-16 w-16 border-4 border-accent/20 border-t-accent mx-auto"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <i class="fas fa-brain text-accent text-xl"></i>
+            </div>
           </div>
+          <h3 class="text-xl font-semibold text-foreground mb-3">
+            <i class="fas fa-magic text-purple-500 mr-2"></i>
+            AI Processing
+          </h3>
+          <p id="ai-status-text" class="text-foreground/70 mb-4">Analyzing your content...</p>
+          <div class="w-full bg-muted rounded-full h-2 mb-4">
+            <div id="ai-progress" class="bg-accent h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+          <p class="text-sm text-foreground/50">
+            <i class="fas fa-robot mr-1"></i>
+            Powered by Fireworks AI
+          </p>
         </div>
       </div>
     </div>
@@ -343,10 +360,72 @@ import { SITE } from "@/config";
     color: var(--color-foreground);
     font-size: 0.875rem;
     transition: all 0.2s;
+    min-width: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    cursor: pointer;
   }
   .editor-btn:hover {
     background: var(--color-accent);
     color: white;
+  }
+  
+  /* Mobile responsiveness improvements */
+  @media (max-width: 768px) {
+    .editor-btn span {
+      display: none !important;
+    }
+    .editor-btn {
+      min-width: 2rem;
+      padding: 0.4rem;
+      font-size: 0.8rem;
+    }
+    
+    .admin-tab {
+      font-size: 0.875rem;
+      padding: 0.75rem 1rem;
+    }
+    
+    /* Stack form elements on mobile */
+    .flex.gap-2 {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .flex.gap-2 input,
+    .flex.gap-2 textarea {
+      flex: none;
+    }
+    
+    .flex.gap-2 button {
+      width: 100%;
+      justify-content: center;
+    }
+    
+    /* Better spacing on mobile */
+    .space-y-6 > * + * {
+      margin-top: 1rem;
+    }
+    
+    .grid.grid-cols-1.lg\\:grid-cols-2 {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .bg-muted.border-b.border-border.p-2.flex.flex-wrap.gap-2 {
+      padding: 0.5rem;
+      gap: 0.25rem;
+    }
+    
+    .editor-btn {
+      min-width: 1.75rem;
+      padding: 0.3rem;
+      font-size: 0.75rem;
+    }
   }
   .media-item {
     position: relative;
@@ -686,12 +765,24 @@ import { SITE } from "@/config";
         return;
       }
 
-      this.showAIModal();
+      const originalLength = field.value.length;
+      const isTitle = fieldId === 'title';
+      const statusText = isTitle ? 'Optimizing title for engagement...' : 'Enhancing description...';
+      
+      this.showAIModal(statusText);
       
       try {
-        const rewrittenText = await this.callFireworksAPI(field.value, 'rewrite');
-        field.value = rewrittenText;
-        this.showNotification('Content rewritten successfully!', 'success');
+        const rewrittenText = await this.callFireworksAPI(field.value, 'rewrite', isTitle ? 'title' : 'description');
+        
+        // Smart length handling
+        if (isTitle && rewrittenText.length > 80) {
+          const truncated = rewrittenText.substring(0, 77) + '...';
+          field.value = truncated;
+          this.showNotification('Title optimized and truncated to ideal length!', 'success');
+        } else {
+          field.value = rewrittenText;
+          this.showNotification(`Content improved! ${originalLength} → ${rewrittenText.length} characters`, 'success');
+        }
       } catch (error) {
         console.error('AI rewrite error:', error);
         this.showNotification('AI rewrite failed. Please try again.', 'error');
@@ -746,7 +837,7 @@ import { SITE } from "@/config";
       }
     }
 
-    async callFireworksAPI(text: string, action: 'rewrite' | 'improve'): Promise<string> {
+    async callFireworksAPI(text: string, action: 'rewrite' | 'improve', contentType: string = 'content'): Promise<string> {
       if (!FIREWORKS_API_KEY) {
         console.warn('No Fireworks API key found. Using demo mode.');
         // Fallback to demo mode
@@ -766,11 +857,23 @@ import { SITE } from "@/config";
         }
       }
 
-      try {
-        const prompts = {
-          rewrite: `As a financial content specialist, please rewrite this text to be more engaging and professional while keeping the core message. Make it suitable for the Nigerian financial market and Cowrywise audience: "${text}"`,
-          improve: `Transform this content into a compelling financial article. Make it more professional, add valuable insights, structure it better with clear sections, and ensure it's relevant to Nigerian readers interested in personal finance and wealth building: "${text}"`
-        };
+              try {
+          const getPrompt = (action: string, contentType: string, text: string) => {
+            if (action === 'rewrite') {
+              switch (contentType) {
+                case 'title':
+                  return `Create an engaging, SEO-optimized title for this financial content. Keep it under 70 characters, make it compelling for Nigerian readers, and ensure it clearly communicates the value proposition: "${text}"`;
+                case 'description':
+                  return `Write a compelling meta description (under 160 characters) that summarizes this financial content for Nigerian readers. Focus on benefits and include relevant keywords: "${text}"`;
+                default:
+                  return `As a financial content specialist, please rewrite this text to be more engaging and professional while keeping the core message. Make it suitable for the Nigerian financial market and Cowrywise audience: "${text}"`;
+              }
+            } else {
+              return `Transform this content into a comprehensive financial article. Add valuable insights, improve structure with clear sections, include practical examples relevant to Nigerian market, and ensure it educates readers about personal finance and wealth building: "${text}"`;
+            }
+          };
+
+          const prompt = getPrompt(action, contentType, text);
 
         const systemPrompts = {
           rewrite: 'You are a senior financial content editor at Cowrywise, specializing in creating engaging, accessible financial content for Nigerian millennials and young professionals. Focus on clarity, practical advice, and local market relevance.',
@@ -792,7 +895,7 @@ import { SITE } from "@/config";
               },
               {
                 role: 'user',
-                content: prompts[action]
+                content: prompt
               }
             ],
             max_tokens: 1500,
@@ -855,16 +958,52 @@ import { SITE } from "@/config";
       return options ? options[Math.floor(Math.random() * options.length)] : word;
     }
 
-    showAIModal() {
+    showAIModal(statusText: string = 'Analyzing your content...') {
       const modal = document.getElementById('ai-modal');
+      const statusEl = document.getElementById('ai-status-text');
+      const progressEl = document.getElementById('ai-progress');
+      
+      if (statusEl) statusEl.textContent = statusText;
+      if (progressEl) progressEl.style.width = '0%';
+      
       modal?.classList.remove('hidden');
       modal?.classList.add('flex');
+      
+      // Simulate smart progress
+      this.simulateProgress();
     }
 
     hideAIModal() {
       const modal = document.getElementById('ai-modal');
       modal?.classList.add('hidden');
       modal?.classList.remove('flex');
+    }
+
+    simulateProgress() {
+      const progressEl = document.getElementById('ai-progress');
+      const statusEl = document.getElementById('ai-status-text');
+      
+      if (!progressEl || !statusEl) return;
+      
+      const steps = [
+        { progress: 15, text: 'Understanding context...' },
+        { progress: 35, text: 'Analyzing financial relevance...' },
+        { progress: 55, text: 'Generating improvements...' },
+        { progress: 75, text: 'Applying Nigerian market context...' },
+        { progress: 90, text: 'Finalizing content...' }
+      ];
+      
+      let currentStep = 0;
+      const interval = setInterval(() => {
+        if (currentStep < steps.length) {
+          const step = steps[currentStep];
+          progressEl.style.width = `${step.progress}%`;
+          statusEl.textContent = step.text;
+          currentStep++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 600);
     }
 
     handleLogin(e: Event) {
