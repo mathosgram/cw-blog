@@ -3,6 +3,7 @@ import tailwindcss from "@tailwindcss/vite";
 import sitemap from "@astrojs/sitemap";
 import remarkToc from "remark-toc";
 import remarkCollapse from "remark-collapse";
+import clerk from "@clerk/astro";
 import {
   transformerNotationDiff,
   transformerNotationHighlight,
@@ -15,6 +16,7 @@ import { SITE } from "./src/config";
 export default defineConfig({
   site: SITE.website,
   integrations: [
+    clerk(),
     sitemap({
       filter: page => SITE.showArchives || !page.endsWith("/archives"),
     }),
@@ -53,6 +55,36 @@ export default defineConfig({
       PUBLIC_GOOGLE_SITE_VERIFICATION: envField.string({
         access: "public",
         context: "client",
+        optional: true,
+      }),
+      PUBLIC_CLERK_PUBLISHABLE_KEY: envField.string({
+        access: "public",
+        context: "client",
+        optional: true,
+      }),
+      CLERK_SECRET_KEY: envField.string({
+        access: "secret",
+        context: "server",
+        optional: true,
+      }),
+      MONGODB_URI: envField.string({
+        access: "secret",
+        context: "server",
+        optional: true,
+      }),
+      IMAGEKIT_PUBLIC_KEY: envField.string({
+        access: "secret",
+        context: "server",
+        optional: true,
+      }),
+      IMAGEKIT_PRIVATE_KEY: envField.string({
+        access: "secret",
+        context: "server",
+        optional: true,
+      }),
+      IMAGEKIT_URL_ENDPOINT: envField.string({
+        access: "secret",
+        context: "server",
         optional: true,
       }),
     },

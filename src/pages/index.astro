@@ -12,12 +12,35 @@ import IconRss from "@/assets/icons/IconRss.svg";
 import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
 import { SITE } from "@/config";
 import { SOCIALS } from "@/constants";
+import { getBlogPostsCollection } from "@/lib/db";
 
+// Get static posts from content collection
 const posts = await getCollection("blog");
-
 const sortedPosts = getSortedPosts(posts);
 const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
 const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
+
+// Get dynamic posts from database
+let dynamicPosts: any[] = [];
+try {
+  const postsCollection = await getBlogPostsCollection();
+  const dbPosts = await postsCollection
+    .find({ published: true })
+    .sort({ publishedAt: -1 })
+    .limit(10)
+    .toArray();
+  
+  dynamicPosts = dbPosts.map(post => ({
+    ...post,
+    _id: post._id.toString(),
+  }));
+} catch (error) {
+  console.error('Error fetching dynamic posts:', error);
+}
+
+const hasDynamicPosts = dynamicPosts.length > 0;
+const dynamicFeaturedPosts = dynamicPosts.filter((post: any) => post.featured);
+const dynamicRecentPosts = dynamicPosts.filter((post: any) => !post.featured);
 ---
 
 <Layout>
@@ -64,59 +87,138 @@ const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
 
     <Hr />
 
-    <!-- Dynamic Posts from Admin Panel -->
-    <div id="dynamic-posts-section" class="hidden">
-      <section id="dynamic-featured" class="pt-12 pb-6 hidden">
-        <h2 class="text-2xl font-semibold tracking-wide">Featured Posts</h2>
-        <ul id="dynamic-featured-list" class="space-y-4">
-          <!-- Dynamic featured posts will be loaded here -->
-        </ul>
-      </section>
-      
-      <div id="dynamic-hr" class="hidden">
-        <Hr />
-      </div>
-
-      <section id="dynamic-recent" class="pt-12 pb-6 hidden">
-        <h2 class="text-2xl font-semibold tracking-wide">Latest Posts</h2>
-        <ul id="dynamic-recent-list" class="space-y-4">
-          <!-- Dynamic recent posts will be loaded here -->
-        </ul>
-      </section>
-    </div>
-
-    <!-- Static Posts from Files (fallback) -->
-    <div id="static-posts-section">
-      {
-        featuredPosts.length > 0 && (
-          <>
-            <section id="featured" class="pt-12 pb-6">
-              <h2 class="text-2xl font-semibold tracking-wide">Featured</h2>
-              <ul>
-                {featuredPosts.map(data => (
-                  <Card variant="h3" {...data} />
-                ))}
-              </ul>
-            </section>
-            {recentPosts.length > 0 && <Hr />}
-          </>
-        )
-      }
-
-      {
-        recentPosts.length > 0 && (
-          <section id="recent-posts" class="pt-12 pb-6">
-            <h2 class="text-2xl font-semibold tracking-wide">Recent Posts</h2>
-            <ul>
-              {recentPosts.map(
-                (data, index) =>
-                  index < SITE.postPerIndex && <Card variant="h3" {...data} />
-              )}
+    {hasDynamicPosts ? (
+      <!-- Dynamic Posts from Database -->
+      <div>
+        {dynamicFeaturedPosts.length > 0 && (
+          <section id="featured" class="pt-12 pb-6">
+            <h2 class="text-2xl font-semibold tracking-wide">Featured Posts</h2>
+            <ul class="space-y-4">
+              {dynamicFeaturedPosts.map(post => (
+                <li class="border border-border rounded-lg p-6 hover:shadow-md transition-shadow bg-background">
+                  <article>
+                    <header>
+                      <h3 class="text-xl font-semibold mb-2">
+                        <a 
+                          href={`/posts/${post.slug}/`} 
+                          class="hover:text-accent transition-colors"
+                          style="color: var(--color-accent);"
+                        >
+                          {post.title}
+                        </a>
+                      </h3>
+                      <div class="flex items-center gap-4 text-sm text-foreground/60 mb-3">
+                        <time datetime={post.publishedAt}>
+                          {new Date(post.publishedAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </time>
+                        <span>by {post.author}</span>
+                        <span class="px-2 py-1 rounded text-xs" style="background-color: color-mix(in srgb, var(--color-accent) 10%, transparent); color: var(--color-accent);">
+                          Featured
+                        </span>
+                      </div>
+                    </header>
+                    <p class="text-foreground/80 mb-3">{post.description}</p>
+                    {post.tags && post.tags.length > 0 && (
+                      <div class="flex flex-wrap gap-1 mt-2">
+                        {post.tags.map((tag: string) => (
+                          <span class="text-xs px-2 py-1 rounded-full bg-muted text-foreground/70">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </article>
+                </li>
+              ))}
             </ul>
           </section>
-        )
-      }
-    </div>
+        )}
+        
+        {dynamicFeaturedPosts.length > 0 && dynamicRecentPosts.length > 0 && <Hr />}
+
+        {dynamicRecentPosts.length > 0 && (
+          <section id="recent-posts" class="pt-12 pb-6">
+            <h2 class="text-2xl font-semibold tracking-wide">Latest Posts</h2>
+            <ul class="space-y-4">
+              {dynamicRecentPosts.slice(0, SITE.postPerIndex).map(post => (
+                <li class="border border-border rounded-lg p-6 hover:shadow-md transition-shadow bg-background">
+                  <article>
+                    <header>
+                      <h3 class="text-xl font-semibold mb-2">
+                        <a 
+                          href={`/posts/${post.slug}/`} 
+                          class="hover:text-accent transition-colors"
+                          style="color: var(--color-accent);"
+                        >
+                          {post.title}
+                        </a>
+                      </h3>
+                      <div class="flex items-center gap-4 text-sm text-foreground/60 mb-3">
+                        <time datetime={post.publishedAt}>
+                          {new Date(post.publishedAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </time>
+                        <span>by {post.author}</span>
+                      </div>
+                    </header>
+                    <p class="text-foreground/80 mb-3">{post.description}</p>
+                    {post.tags && post.tags.length > 0 && (
+                      <div class="flex flex-wrap gap-1 mt-2">
+                        {post.tags.map((tag: string) => (
+                          <span class="text-xs px-2 py-1 rounded-full bg-muted text-foreground/70">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </article>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+      </div>
+    ) : (
+      <!-- Fallback to Static Posts -->
+      <div>
+        {
+          featuredPosts.length > 0 && (
+            <>
+              <section id="featured" class="pt-12 pb-6">
+                <h2 class="text-2xl font-semibold tracking-wide">Featured</h2>
+                <ul>
+                  {featuredPosts.map(data => (
+                    <Card variant="h3" {...data} />
+                  ))}
+                </ul>
+              </section>
+              {recentPosts.length > 0 && <Hr />}
+            </>
+          )
+        }
+
+        {
+          recentPosts.length > 0 && (
+            <section id="recent-posts" class="pt-12 pb-6">
+              <h2 class="text-2xl font-semibold tracking-wide">Recent Posts</h2>
+              <ul>
+                {recentPosts.map(
+                  (data, index) =>
+                    index < SITE.postPerIndex && <Card variant="h3" {...data} />
+                )}
+              </ul>
+            </section>
+          )
+        }
+      </div>
+    )}
 
     <div class="my-8 text-center">
       <LinkButton href="/posts/">
@@ -129,157 +231,11 @@ const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
 </Layout>
 
 <script>
-  interface PublishedPost {
-    id: number;
-    title: string;
-    description: string;
-    author: string;
-    tags: string;
-    content: string;
-    featured: boolean;
-    publishedDate: string;
-    slug: string;
-  }
-
-  class DynamicPostLoader {
-    constructor() {
-      this.loadDynamicPosts();
-    }
-
-    loadDynamicPosts() {
-      try {
-        const publishedPosts = JSON.parse(localStorage.getItem('publishedPosts') || '[]') as PublishedPost[];
-        
-        if (publishedPosts.length > 0) {
-          this.displayDynamicPosts(publishedPosts);
-          this.hideStaticPosts();
-        } else {
-          this.showStaticPosts();
-        }
-      } catch (error) {
-        console.error('Error loading dynamic posts:', error);
-        this.showStaticPosts();
-      }
-    }
-
-    displayDynamicPosts(posts: PublishedPost[]) {
-      const dynamicSection = document.getElementById('dynamic-posts-section');
-      const featuredSection = document.getElementById('dynamic-featured');
-      const recentSection = document.getElementById('dynamic-recent');
-      const featuredList = document.getElementById('dynamic-featured-list');
-      const recentList = document.getElementById('dynamic-recent-list');
-      const dynamicHr = document.getElementById('dynamic-hr');
-
-      if (!dynamicSection || !featuredSection || !recentSection || !featuredList || !recentList) {
-        return;
-      }
-
-      // Sort posts by date (newest first)
-      const sortedPosts = posts.sort((a, b) => new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime());
-      
-      // Separate featured and regular posts
-      const featuredPosts = sortedPosts.filter(post => post.featured);
-      const regularPosts = sortedPosts.filter(post => !post.featured);
-
-             // Display featured posts
-       if (featuredPosts.length > 0) {
-         featuredList.innerHTML = featuredPosts.map(post => this.createPostCard(post)).join('');
-         featuredSection.classList.remove('hidden');
-         if (regularPosts.length > 0 && dynamicHr) {
-           dynamicHr.classList.remove('hidden');
-         }
-       }
-
-      // Display recent posts (limit to 4)
-      if (regularPosts.length > 0) {
-        const recentToShow = regularPosts.slice(0, 4);
-        recentList.innerHTML = recentToShow.map(post => this.createPostCard(post)).join('');
-        recentSection.classList.remove('hidden');
-      }
-
-      dynamicSection.classList.remove('hidden');
-    }
-
-    createPostCard(post: PublishedPost): string {
-      const publishedDate = new Date(post.publishedDate).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-
-      const tags = post.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
-      const tagsHtml = tags.length > 0 ? 
-        `<div class="flex flex-wrap gap-1 mt-2">
-          ${tags.map(tag => `<span class="text-xs px-2 py-1 rounded-full bg-muted text-foreground/70">${tag}</span>`).join('')}
-        </div>` : '';
-
-      return `
-        <li class="border border-border rounded-lg p-6 hover:shadow-md transition-shadow bg-background">
-          <article>
-            <header>
-              <h3 class="text-xl font-semibold mb-2">
-                <a href="/posts/${post.slug}/" class="hover:text-accent transition-colors" style="color: var(--color-accent);">
-                  ${post.title}
-                </a>
-              </h3>
-              <div class="flex items-center gap-4 text-sm text-foreground/60 mb-3">
-                <time datetime="${post.publishedDate}">${publishedDate}</time>
-                <span>by ${post.author}</span>
-                ${post.featured ? '<span class="px-2 py-1 rounded text-xs" style="background-color: color-mix(in srgb, var(--color-accent) 10%, transparent); color: var(--color-accent);">Featured</span>' : ''}
-              </div>
-            </header>
-            <p class="text-foreground/80 mb-3">${post.description}</p>
-            ${tagsHtml}
-          </article>
-        </li>
-      `;
-    }
-
-    hideStaticPosts() {
-      const staticSection = document.getElementById('static-posts-section');
-      if (staticSection) {
-        staticSection.classList.add('hidden');
-      }
-    }
-
-    showStaticPosts() {
-      const staticSection = document.getElementById('static-posts-section');
-      const dynamicSection = document.getElementById('dynamic-posts-section');
-      
-      if (staticSection) {
-        staticSection.classList.remove('hidden');
-      }
-      if (dynamicSection) {
-        dynamicSection.classList.add('hidden');
-      }
-    }
-  }
-
-  // Initialize dynamic post loader when page loads
-  document.addEventListener('DOMContentLoaded', () => {
-    new DynamicPostLoader();
-  });
-
-  // Also initialize when navigating with Astro (for view transitions)
   document.addEventListener("astro:page-load", () => {
-    new DynamicPostLoader();
-    
     const indexLayout = (document.querySelector("#main-content") as HTMLElement)
       ?.dataset?.layout;
     if (indexLayout) {
       sessionStorage.setItem("backUrl", "/");
     }
-  });
-
-  // Listen for storage changes (when admin posts are added)
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'publishedPosts') {
-      new DynamicPostLoader();
-    }
-  });
-
-  // Custom event listener for same-tab updates
-  window.addEventListener('postsUpdated', () => {
-    new DynamicPostLoader();
   });
 </script>

@@ -10,16 +10,22 @@
     "astro": "astro",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "setup:db": "node scripts/setup-db.js"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.12",
     "@astrojs/sitemap": "^3.4.1",
+    "@clerk/astro": "^2.10.14",
+    "@clerk/backend": "^2.6.3",
+    "@clerk/clerk-js": "^5.80.0",
     "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/vite": "^4.1.11",
     "astro": "^5.12.0",
     "dayjs": "^1.11.13",
+    "imagekit": "^6.0.0",
     "lodash.kebabcase": "^4.1.1",
+    "mongodb": "^6.18.0",
     "remark-collapse": "^0.1.2",
     "remark-toc": "^9.0.0",
     "satori": "^0.15.2",
