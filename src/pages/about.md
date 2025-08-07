@@ -5,7 +5,7 @@ title: "About"
 
 Stack is the official writing platform for the Cowrywise Ambassador Writing Group, bringing together passionate financial writers and educators dedicated to promoting financial literacy across Nigeria.
 
-![Stack - Cowrywise Ambassador Writing Group](public/stack-og.jpg)
+![Stack - Cowrywise Ambassador Writing Group](/stack-og.jpg)
 
 Our mission is to democratize financial knowledge by sharing insights, stories, and practical guidance that help Nigerians make informed financial decisions and build sustainable wealth.
 

@@ -2,7 +2,7 @@
 title: "Welcome to Stack - Your Financial Literacy Journey Starts Here"
 author: "Cowrywise Ambassador Team"
 description: "Discover how Stack empowers the Cowrywise Ambassador Writing Group to share financial wisdom and build a financially literate Nigeria."
-pubDate: "2024-01-20"
+pubDatetime: 2024-01-20T08:00:00Z
 featured: true
 tags: ["welcome", "financial-literacy", "nigeria", "investing", "savings"]
 ---
