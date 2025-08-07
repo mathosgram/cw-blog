@@ -3,64 +3,35 @@ import { getCollection } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
-
 import LinkButton from "@/components/LinkButton.astro";
 import Card from "@/components/Card.astro";
 import Hr from "@/components/Hr.astro";
 import getSortedPosts from "@/utils/getSortedPosts";
 import IconRss from "@/assets/icons/IconRss.svg";
 import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
-import { SITE } from "@/config";
-
-import { getBlogPosts } from "@/lib/redis";
 
 // Get static posts from content collection
 const posts = await getCollection("blog");
 const sortedPosts = getSortedPosts(posts);
 const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
 const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
-
-// Get dynamic posts from Redis database
-let dynamicPosts: any[] = [];
-try {
-  const dbPosts = await getBlogPosts({ 
-    published: true, 
-    limit: 10 
-  });
-  
-  dynamicPosts = dbPosts.map(post => ({
-    ...post,
-    id: post.id,
-  }));
-} catch (error) {
-  console.error('Error fetching dynamic posts:', error);
-}
-
-const hasDynamicPosts = dynamicPosts.length > 0;
-const dynamicFeaturedPosts = dynamicPosts.filter((post: any) => post.featured);
-const dynamicRecentPosts = dynamicPosts.filter((post: any) => !post.featured);
 ---
 
 <Layout>
   <Header />
-  <main id="main-content" data-layout="index">
-    <section id="hero" class="pt-8 pb-6">
-      <h1 class="my-4 inline-block text-4xl font-bold sm:my-8 sm:text-5xl">
-        Welcome to Stack
+  <main id="main-content">
+    <section id="hero">
+      <h1 class="mr-2 text-4xl font-bold">
+        Welcome to <span style="color: var(--color-accent);">Stack</span>
       </h1>
       <a
         target="_blank"
         href="/rss.xml"
-        class="inline-block"
+        class="rss-link"
         aria-label="rss feed"
         title="RSS Feed"
       >
-        <IconRss
-          width={20}
-          height={20}
-          class="scale-125 stroke-accent stroke-3 rtl:-rotate-90"
-        />
-        <span class="sr-only">RSS Feed</span>
+        <IconRss class="inline-block size-6 fill-current" />
       </a>
 
       <p>
@@ -77,155 +48,102 @@ const dynamicRecentPosts = dynamicPosts.filter((post: any) => !post.featured);
 
     <Hr />
 
-    {hasDynamicPosts ? (
-      <!-- Dynamic Posts from Database -->
-      <div>
-        {dynamicFeaturedPosts.length > 0 && (
+    <!-- Featured Posts -->
+    {
+      featuredPosts.length > 0 && (
+        <>
           <section id="featured" class="pt-12 pb-6">
-            <h2 class="text-2xl font-semibold tracking-wide">Featured Posts</h2>
-            <ul class="space-y-4">
-              {dynamicFeaturedPosts.map(post => (
-                <li class="border border-border rounded-lg p-6 hover:shadow-md transition-shadow bg-background">
-                  <article>
-                    <header>
-                      <h3 class="text-xl font-semibold mb-2">
-                        <a 
-                          href={`/posts/${post.slug}/`} 
-                          class="hover:text-accent transition-colors"
-                          style="color: var(--color-accent);"
-                        >
-                          {post.title}
-                        </a>
-                      </h3>
-                      <div class="flex items-center gap-4 text-sm text-foreground/60 mb-3">
-                        <time datetime={post.publishedAt}>
-                          {new Date(post.publishedAt).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </time>
-                        <span>by {post.author}</span>
-                        <span class="px-2 py-1 rounded text-xs" style="background-color: color-mix(in srgb, var(--color-accent) 10%, transparent); color: var(--color-accent);">
-                          Featured
-                        </span>
-                      </div>
-                    </header>
-                    <p class="text-foreground/80 mb-3">{post.description}</p>
-                    {post.tags && post.tags.length > 0 && (
-                      <div class="flex flex-wrap gap-1 mt-2">
-                        {post.tags.map((tag: string) => (
-                          <span class="text-xs px-2 py-1 rounded-full bg-muted text-foreground/70">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </article>
-                </li>
+            <h2 class="text-2xl font-semibold tracking-wide">Featured</h2>
+            <ul>
+              {featuredPosts.map(data => (
+                <Card variant="h3" {...data} />
               ))}
             </ul>
           </section>
-        )}
-        
-        {dynamicFeaturedPosts.length > 0 && dynamicRecentPosts.length > 0 && <Hr />}
+          {recentPosts.length > 0 && <Hr />}
+        </>
+      )
+    }
 
-        {dynamicRecentPosts.length > 0 && (
-          <section id="recent-posts" class="pt-12 pb-6">
-            <h2 class="text-2xl font-semibold tracking-wide">Latest Posts</h2>
-            <ul class="space-y-4">
-              {dynamicRecentPosts.slice(0, SITE.postPerIndex).map(post => (
-                <li class="border border-border rounded-lg p-6 hover:shadow-md transition-shadow bg-background">
-                  <article>
-                    <header>
-                      <h3 class="text-xl font-semibold mb-2">
-                        <a 
-                          href={`/posts/${post.slug}/`} 
-                          class="hover:text-accent transition-colors"
-                          style="color: var(--color-accent);"
-                        >
-                          {post.title}
-                        </a>
-                      </h3>
-                      <div class="flex items-center gap-4 text-sm text-foreground/60 mb-3">
-                        <time datetime={post.publishedAt}>
-                          {new Date(post.publishedAt).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </time>
-                        <span>by {post.author}</span>
-                      </div>
-                    </header>
-                    <p class="text-foreground/80 mb-3">{post.description}</p>
-                    {post.tags && post.tags.length > 0 && (
-                      <div class="flex flex-wrap gap-1 mt-2">
-                        {post.tags.map((tag: string) => (
-                          <span class="text-xs px-2 py-1 rounded-full bg-muted text-foreground/70">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </article>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-      </div>
-    ) : (
-      <!-- Fallback to Static Posts -->
-      <div>
-        {
-          featuredPosts.length > 0 && (
-            <>
-              <section id="featured" class="pt-12 pb-6">
-                <h2 class="text-2xl font-semibold tracking-wide">Featured</h2>
-                <ul>
-                  {featuredPosts.map(data => (
-                    <Card variant="h3" {...data} />
-                  ))}
-                </ul>
-              </section>
-              {recentPosts.length > 0 && <Hr />}
-            </>
-          )
-        }
+    <!-- Recent Posts -->
+    {
+      recentPosts.length > 0 && (
+        <section id="recent-posts" class="pb-6 pt-12">
+          <h2 class="text-2xl font-semibold tracking-wide">Recent Posts</h2>
+          <ul>
+            {recentPosts.map(data => (
+              <Card variant="h3" {...data} />
+            ))}
+          </ul>
+        </section>
+      )
+    }
 
-        {
-          recentPosts.length > 0 && (
-            <section id="recent-posts" class="pt-12 pb-6">
-              <h2 class="text-2xl font-semibold tracking-wide">Recent Posts</h2>
-              <ul>
-                {recentPosts.map(
-                  (data, index) =>
-                    index < SITE.postPerIndex && <Card variant="h3" {...data} />
-                )}
-              </ul>
-            </section>
-          )
-        }
-      </div>
-    )}
-
-    <div class="my-8 text-center">
+    <div class="all-posts-btn-wrapper">
       <LinkButton href="/posts/">
         All Posts
-        <IconArrowRight class="inline-block rtl:-rotate-180" />
+        <IconArrowRight class="inline-block size-4 fill-current" />
       </LinkButton>
     </div>
   </main>
+
   <Footer />
 </Layout>
 
-<script>
-  document.addEventListener("astro:page-load", () => {
-    const indexLayout = (document.querySelector("#main-content") as HTMLElement)
-      ?.dataset?.layout;
-    if (indexLayout) {
-      sessionStorage.setItem("backUrl", "/");
+<style>
+  #hero {
+    padding-bottom: 1.5rem;
+    padding-top: 2rem;
+  }
+  #hero h1 {
+    margin: 1rem 0;
+    display: inline-block;
+    font-size: 1.875rem;
+    font-weight: 700;
+  }
+  @media (min-width: 640px) {
+    #hero h1 {
+      margin: 2rem 0;
+      font-size: 3rem;
     }
-  });
-</script>
+  }
+  #hero .rss-link {
+    margin-bottom: 1.5rem;
+  }
+  #hero .rss-link svg {
+    margin-bottom: 0.5rem;
+    display: inline-block;
+    width: 1.5rem;
+    height: 1.5rem;
+    transform: scale(1.1);
+    fill: color-mix(in srgb, var(--color-accent) 75%, transparent);
+    transition: all 0.3s;
+  }
+  #hero .rss-link svg:hover {
+    fill: var(--color-accent);
+  }
+  @media (min-width: 640px) {
+    #hero .rss-link svg {
+      margin-bottom: 0.75rem;
+      transform: scale(1.25);
+    }
+  }
+  #hero p {
+    margin: 0.5rem 0;
+  }
+  #featured,
+  #recent-posts {
+    padding-bottom: 1.5rem;
+    padding-top: 3rem;
+  }
+  #featured h2,
+  #recent-posts h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+  }
+  .all-posts-btn-wrapper {
+    margin: 2rem 0;
+    text-align: center;
+  }
+</style>
