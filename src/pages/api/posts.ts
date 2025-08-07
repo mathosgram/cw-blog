@@ -1,5 +1,13 @@
 import type { APIRoute } from 'astro';
-import { getBlogPostsCollection, getAuthorsCollection, type BlogPost } from '../../lib/db';
+import { 
+  getBlogPosts, 
+  createBlogPost, 
+  updateBlogPost, 
+  deleteBlogPost, 
+  getBlogPostById,
+  getAuthorByClerkId,
+  createAuthor
+} from '../../lib/redis';
 import { authenticateRequest, clerkClient } from '../../lib/auth';
 
 export const GET: APIRoute = async ({ request }) => {
@@ -10,40 +18,37 @@ export const GET: APIRoute = async ({ request }) => {
     const featured = searchParams.get('featured') === 'true';
     const published = searchParams.get('published') !== 'false'; // Default to published only
     
-    const postsCollection = await getBlogPostsCollection();
-    
-    // Build query
-    const query: any = { published };
+    // Build options for Redis query
+    const options: any = { 
+      published,
+      limit,
+      offset: (page - 1) * limit
+    };
     if (featured) {
-      query.featured = true;
+      options.featured = true;
     }
     
-    // Get posts with pagination
-    const posts = await postsCollection
-      .find(query)
-      .sort({ publishedAt: -1, createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .toArray();
+    // Get posts from Redis
+    const posts = await getBlogPosts(options);
     
-    // Get total count for pagination
-    const total = await postsCollection.countDocuments(query);
+    // Get all posts count for pagination (simplified approach)
+    const allPosts = await getBlogPosts({ published });
+    const total = allPosts.length;
     
     // Get author details for posts
-    const authorsCollection = await getAuthorsCollection();
-    const authorIds = [...new Set(posts.map(post => post.authorId))];
-    const authors = await authorsCollection.find({ clerkId: { $in: authorIds } }).toArray();
-    const authorMap = new Map(authors.map(author => [author.clerkId, author]));
-    
-    // Enhance posts with author information
-    const enhancedPosts = posts.map(post => ({
-      ...post,
-      authorInfo: authorMap.get(post.authorId) || {
-        firstName: post.author || 'Unknown',
-        lastName: '',
-        imageUrl: null
-      }
-    }));
+    const enhancedPosts = await Promise.all(
+      posts.map(async (post) => {
+        const authorInfo = await getAuthorByClerkId(post.authorId);
+        return {
+          ...post,
+          authorInfo: authorInfo || {
+            firstName: post.author || 'Unknown',
+            lastName: '',
+            imageUrl: null
+          }
+        };
+      })
+    );
 
     return new Response(JSON.stringify({
       success: true,
@@ -70,9 +75,7 @@ export const GET: APIRoute = async ({ request }) => {
       error: 'Failed to fetch posts' 
     }), {
       status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' }
     });
   }
 };
@@ -81,27 +84,41 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     // Authenticate request
     const auth = await authenticateRequest(request);
-    if (!auth.success) {
+    if (!auth.success || !auth.userId) {
       return new Response(JSON.stringify({ 
-        success: false,
-        error: auth.error 
+        success: false, 
+        error: auth.error || 'Unauthorized' 
       }), {
         status: 401,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    const body = await request.json();
-    const { title, description, content, tags, featured, published, coverImage, images, videos } = body;
+    const data = await request.json();
+    const { title, description, content, tags = [], featured = false, published = false, coverImage } = data;
 
-    // Validate required fields
     if (!title || !description || !content) {
       return new Response(JSON.stringify({ 
-        success: false,
+        success: false, 
         error: 'Title, description, and content are required' 
       }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Get or create author
+    let author = await getAuthorByClerkId(auth.userId);
+    if (!author) {
+      // Create author from Clerk user info
+      const clerkUser = await clerkClient.users.getUser(auth.userId);
+      author = await createAuthor({
+        clerkId: auth.userId,
+        email: clerkUser.emailAddresses[0]?.emailAddress || '',
+        firstName: clerkUser.firstName || '',
+        lastName: clerkUser.lastName || '',
+        imageUrl: clerkUser.imageUrl || undefined,
+        role: 'author'
       });
     }
 
@@ -111,74 +128,38 @@ export const POST: APIRoute = async ({ request }) => {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
 
-    // Get user information
-    const user = await clerkClient.users.getUser(auth.userId!);
-    const authorsCollection = await getAuthorsCollection();
-    
-    // Ensure user exists in our authors collection
-    let author = await authorsCollection.findOne({ clerkId: auth.userId! });
-    if (!author) {
-      const newAuthor = {
-        clerkId: auth.userId!!,
-        email: user.emailAddresses[0]?.emailAddress || '',
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        imageUrl: user.imageUrl || '',
-        role: 'author' as const,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      const result = await authorsCollection.insertOne(newAuthor);
-      author = { ...newAuthor, _id: result.insertedId.toString() };
-    }
-
-    // Create new post
-    const postsCollection = await getBlogPostsCollection();
-    const newPost: Omit<BlogPost, '_id'> = {
+    // Create the blog post
+    const post = await createBlogPost({
       title,
       description,
       content,
       author: `${author.firstName} ${author.lastName}`.trim() || author.email,
-      authorId: auth.userId!,
-      tags: Array.isArray(tags) ? tags : tags ? tags.split(',').map((t: string) => t.trim()) : [],
-      featured: Boolean(featured),
-      published: Boolean(published),
+      authorId: auth.userId,
+      tags: Array.isArray(tags) ? tags : [],
+      featured,
+      published,
       slug,
       coverImage,
-      images: images || [],
-      videos: videos || [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      publishedAt: published ? new Date() : undefined,
-      views: 0,
-    };
+      images: [],
+      videos: [],
+      views: 0
+    });
 
-    const result = await postsCollection.insertOne(newPost);
-
-    return new Response(JSON.stringify({ 
+    return new Response(JSON.stringify({
       success: true,
-      data: {
-        id: result.insertedId,
-        slug,
-        message: published ? 'Post published successfully' : 'Post saved as draft'
-      }
+      data: { post }
     }), {
       status: 201,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
     console.error('Error creating post:', error);
     return new Response(JSON.stringify({ 
-      success: false,
+      success: false, 
       error: 'Failed to create post' 
     }), {
       status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' }
     });
   }
 };
@@ -187,104 +168,79 @@ export const PUT: APIRoute = async ({ request }) => {
   try {
     // Authenticate request
     const auth = await authenticateRequest(request);
-    if (!auth.success) {
+    if (!auth.success || !auth.userId) {
       return new Response(JSON.stringify({ 
-        success: false,
-        error: auth.error 
+        success: false, 
+        error: auth.error || 'Unauthorized' 
       }), {
         status: 401,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    const body = await request.json();
-    const { id, title, description, content, tags, featured, published, coverImage, images, videos } = body;
+    const data = await request.json();
+    const { id, ...updates } = data;
 
     if (!id) {
       return new Response(JSON.stringify({ 
-        success: false,
+        success: false, 
         error: 'Post ID is required' 
       }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    const postsCollection = await getBlogPostsCollection();
-    
-    // Check if user owns the post or is admin
-    const existingPost = await postsCollection.findOne({ _id: id });
+    // Get existing post
+    const existingPost = await getBlogPostById(id);
     if (!existingPost) {
       return new Response(JSON.stringify({ 
-        success: false,
+        success: false, 
         error: 'Post not found' 
       }), {
         status: 404,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    // Check ownership (unless user is admin)
-    const authorsCollection = await getAuthorsCollection();
-    const author = await authorsCollection.findOne({ clerkId: auth.userId! });
-    
+    // Check if user owns the post or is admin
+    const author = await getAuthorByClerkId(auth.userId);
     if (existingPost.authorId !== auth.userId && author?.role !== 'admin') {
       return new Response(JSON.stringify({ 
-        success: false,
-        error: 'Unauthorized to edit this post' 
+        success: false, 
+        error: 'Forbidden' 
       }), {
         status: 403,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    // Generate new slug if title changed
-    const slug = title !== existingPost.title 
-      ? title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-      : existingPost.slug;
-
-    // Update post
-    const updateData: Partial<BlogPost> = {
-      title,
-      description,
-      content,
-      tags: Array.isArray(tags) ? tags : tags ? tags.split(',').map((t: string) => t.trim()) : [],
-      featured: Boolean(featured),
-      published: Boolean(published),
-      slug,
-      coverImage,
-      images: images || [],
-      videos: videos || [],
-      updatedAt: new Date(),
-    };
-
-    // If publishing for the first time, set publishedAt
-    if (published && !existingPost.published) {
-      updateData.publishedAt = new Date();
+    // Update slug if title changed
+    if (updates.title && updates.title !== existingPost.title) {
+      updates.slug = updates.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
     }
 
-    await postsCollection.updateOne({ _id: id }, { $set: updateData });
+    // Update the post
+    const updatedPost = await updateBlogPost(id, updates);
 
-    return new Response(JSON.stringify({ 
+    return new Response(JSON.stringify({
       success: true,
-      message: 'Post updated successfully'
+      data: { post: updatedPost }
     }), {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
     console.error('Error updating post:', error);
     return new Response(JSON.stringify({ 
-      success: false,
+      success: false, 
       error: 'Failed to update post' 
     }), {
       status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' }
     });
   }
 };
@@ -293,79 +249,81 @@ export const DELETE: APIRoute = async ({ request }) => {
   try {
     // Authenticate request
     const auth = await authenticateRequest(request);
-    if (!auth.success) {
+    if (!auth.success || !auth.userId) {
       return new Response(JSON.stringify({ 
-        success: false,
-        error: auth.error 
+        success: false, 
+        error: auth.error || 'Unauthorized' 
       }), {
         status: 401,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    const { id } = await request.json();
+    const data = await request.json();
+    const { id } = data;
 
     if (!id) {
       return new Response(JSON.stringify({ 
-        success: false,
+        success: false, 
         error: 'Post ID is required' 
       }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    const postsCollection = await getBlogPostsCollection();
-    
-    // Check if user owns the post or is admin
-    const existingPost = await postsCollection.findOne({ _id: id });
+    // Get existing post
+    const existingPost = await getBlogPostById(id);
     if (!existingPost) {
       return new Response(JSON.stringify({ 
-        success: false,
+        success: false, 
         error: 'Post not found' 
       }), {
         status: 404,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    // Check ownership (unless user is admin)
-    const authorsCollection = await getAuthorsCollection();
-    const author = await authorsCollection.findOne({ clerkId: auth.userId! });
-    
+    // Check if user owns the post or is admin
+    const author = await getAuthorByClerkId(auth.userId);
     if (existingPost.authorId !== auth.userId && author?.role !== 'admin') {
       return new Response(JSON.stringify({ 
-        success: false,
-        error: 'Unauthorized to delete this post' 
+        success: false, 
+        error: 'Forbidden' 
       }), {
         status: 403,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' }
       });
     }
 
     // Delete the post
-    await postsCollection.deleteOne({ _id: id });
+    const deleted = await deleteBlogPost(id);
 
-    return new Response(JSON.stringify({ 
+    if (!deleted) {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: 'Failed to delete post' 
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    return new Response(JSON.stringify({
       success: true,
       message: 'Post deleted successfully'
     }), {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
     console.error('Error deleting post:', error);
     return new Response(JSON.stringify({ 
-      success: false,
+      success: false, 
       error: 'Failed to delete post' 
     }), {
       status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' }
     });
   }
 };

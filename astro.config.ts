@@ -69,7 +69,12 @@ export default defineConfig({
         context: "server",
         optional: true,
       }),
-      MONGODB_URI: envField.string({
+      REDIS_URL: envField.string({
+        access: "secret",
+        context: "server",
+        optional: true,
+      }),
+      REDIS_TOKEN: envField.string({
         access: "secret",
         context: "server",
         optional: true,

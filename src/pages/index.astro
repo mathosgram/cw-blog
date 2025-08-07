@@ -12,7 +12,7 @@ import IconRss from "@/assets/icons/IconRss.svg";
 import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
 import { SITE } from "@/config";
 import { SOCIALS } from "@/constants";
-import { getBlogPostsCollection } from "@/lib/db";
+import { getBlogPosts } from "@/lib/redis";
 
 // Get static posts from content collection
 const posts = await getCollection("blog");
@@ -20,19 +20,17 @@ const sortedPosts = getSortedPosts(posts);
 const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
 const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
 
-// Get dynamic posts from database
+// Get dynamic posts from Redis database
 let dynamicPosts: any[] = [];
 try {
-  const postsCollection = await getBlogPostsCollection();
-  const dbPosts = await postsCollection
-    .find({ published: true })
-    .sort({ publishedAt: -1 })
-    .limit(10)
-    .toArray();
+  const dbPosts = await getBlogPosts({ 
+    published: true, 
+    limit: 10 
+  });
   
   dynamicPosts = dbPosts.map(post => ({
     ...post,
-    _id: post._id.toString(),
+    id: post.id,
   }));
 } catch (error) {
   console.error('Error fetching dynamic posts:', error);

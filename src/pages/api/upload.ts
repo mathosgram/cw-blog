@@ -1,16 +1,16 @@
 import type { APIRoute } from 'astro';
 import { uploadFile, deleteFile } from '../../lib/imagekit';
-import { getMediaCollection, getAuthorsCollection, type MediaFile } from '../../lib/db';
+import { createMediaFile, getMediaFiles, deleteMediaFile, getMediaFileById } from '../../lib/redis';
 import { authenticateRequest } from '../../lib/auth';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
     // Authenticate request
     const auth = await authenticateRequest(request);
-    if (!auth.success) {
+    if (!auth.success || !auth.userId) {
       return new Response(JSON.stringify({ 
-        success: false,
-        error: auth.error 
+        success: false, 
+        error: auth.error || 'Unauthorized' 
       }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' },
@@ -19,8 +19,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    const postId = formData.get('postId') as string;
-    
+
     if (!file) {
       return new Response(JSON.stringify({ 
         success: false,
@@ -62,36 +61,30 @@ export const POST: APIRoute = async ({ request }) => {
     // Upload to ImageKit
     const uploadResult = await uploadFile(buffer, file.name, 'blog/uploads');
 
-    // Save media record to database
-    const mediaCollection = await getMediaCollection();
-    const mediaRecord: Omit<MediaFile, '_id'> = {
+    // Save media record to Redis
+    const mediaRecord = await createMediaFile({
       fileName: uploadResult.name,
       fileId: uploadResult.fileId,
       url: uploadResult.url,
       thumbnailUrl: uploadResult.thumbnailUrl,
       fileType: file.type.startsWith('image/') ? 'image' : 'video',
       size: file.size,
-      uploadedBy: auth.userId!,
-      uploadedAt: new Date(),
-      postId: postId || undefined,
-    };
+      uploadedBy: auth.userId
+    });
 
-    const result = await mediaCollection.insertOne(mediaRecord);
-
-    return new Response(JSON.stringify({ 
+    return new Response(JSON.stringify({
       success: true,
       data: {
-        id: result.insertedId,
-        ...mediaRecord,
-        url: uploadResult.url,
-        thumbnailUrl: uploadResult.thumbnailUrl,
+        id: mediaRecord.id,
+        fileName: mediaRecord.fileName,
+        url: mediaRecord.url,
+        thumbnailUrl: mediaRecord.thumbnailUrl,
+        fileType: mediaRecord.fileType,
+        size: mediaRecord.size
       }
     }), {
       status: 201,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
     console.error('Error uploading file:', error);
@@ -100,9 +93,7 @@ export const POST: APIRoute = async ({ request }) => {
       error: 'Failed to upload file' 
     }), {
       status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 };
@@ -111,10 +102,10 @@ export const DELETE: APIRoute = async ({ request }) => {
   try {
     // Authenticate request
     const auth = await authenticateRequest(request);
-    if (!auth.success) {
+    if (!auth.success || !auth.userId) {
       return new Response(JSON.stringify({ 
-        success: false,
-        error: auth.error 
+        success: false, 
+        error: auth.error || 'Unauthorized' 
       }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' },
@@ -133,63 +124,65 @@ export const DELETE: APIRoute = async ({ request }) => {
       });
     }
 
-    const mediaCollection = await getMediaCollection();
-    
-    // Get media record
-    const mediaRecord = await mediaCollection.findOne({ _id: id });
+    // Get media record from Redis
+    const mediaRecord = await getMediaFileById(id);
     if (!mediaRecord) {
       return new Response(JSON.stringify({ 
         success: false,
-        error: 'Media not found' 
+        error: 'Media file not found' 
       }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    // Check if user owns the media or is admin
+    // Check if user owns the media file (or is admin)
     if (mediaRecord.uploadedBy !== auth.userId) {
-      // Check if user is admin
-      const authorsCollection = await getAuthorsCollection();
-      const author = await authorsCollection.findOne({ clerkId: auth.userId! });
-      
-      if (author?.role !== 'admin') {
-        return new Response(JSON.stringify({ 
-          success: false,
-          error: 'Unauthorized to delete this media' 
-        }), {
-          status: 403,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      }
+      // TODO: Add admin check when needed
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: 'Forbidden' 
+      }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    // Delete from ImageKit
-    await deleteFile(mediaRecord.fileId);
+    try {
+      // Delete from ImageKit
+      await deleteFile(mediaRecord.fileId);
+    } catch (error) {
+      console.error('Error deleting file from ImageKit:', error);
+      // Continue with database deletion even if ImageKit deletion fails
+    }
 
-    // Delete from database
-    await mediaCollection.deleteOne({ _id: id });
+    // Delete from Redis
+    const deleted = await deleteMediaFile(id);
+    if (!deleted) {
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: 'Failed to delete media record' 
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
 
-    return new Response(JSON.stringify({ 
+    return new Response(JSON.stringify({
       success: true,
-      message: 'Media deleted successfully'
+      message: 'Media file deleted successfully'
     }), {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error deleting media:', error);
+    console.error('Error deleting media file:', error);
     return new Response(JSON.stringify({ 
       success: false,
-      error: 'Failed to delete media' 
+      error: 'Failed to delete media file' 
     }), {
       status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 };
@@ -198,10 +191,10 @@ export const GET: APIRoute = async ({ request }) => {
   try {
     // Authenticate request
     const auth = await authenticateRequest(request);
-    if (!auth.success) {
+    if (!auth.success || !auth.userId) {
       return new Response(JSON.stringify({ 
-        success: false,
-        error: auth.error 
+        success: false, 
+        error: auth.error || 'Unauthorized' 
       }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' },
@@ -209,61 +202,27 @@ export const GET: APIRoute = async ({ request }) => {
     }
 
     const searchParams = new URL(request.url).searchParams;
-    const postId = searchParams.get('postId');
-    const fileType = searchParams.get('fileType') as 'image' | 'video' | undefined;
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const limit = parseInt(searchParams.get('limit') || '50');
+    const offset = parseInt(searchParams.get('offset') || '0');
 
-    const mediaCollection = await getMediaCollection();
-    
-    // Build query
-    const query: any = {};
-    if (postId) {
-      query.postId = postId;
-    }
-    if (fileType) {
-      query.fileType = fileType;
-    }
-
-    // Get media files with pagination
-    const mediaFiles = await mediaCollection
-      .find(query)
-      .sort({ uploadedAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .toArray();
-
-    // Get total count for pagination
-    const total = await mediaCollection.countDocuments(query);
+    // Get media files from Redis
+    const mediaFiles = await getMediaFiles(limit, offset);
 
     return new Response(JSON.stringify({
       success: true,
-      data: {
-        media: mediaFiles,
-        pagination: {
-          page,
-          limit,
-          total,
-          pages: Math.ceil(total / limit)
-        }
-      }
+      data: mediaFiles
     }), {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error fetching media:', error);
+    console.error('Error fetching media files:', error);
     return new Response(JSON.stringify({ 
       success: false,
-      error: 'Failed to fetch media' 
+      error: 'Failed to fetch media files' 
     }), {
       status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 };

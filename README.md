@@ -1,6 +1,6 @@
 # Stack - Cowrywise Ambassador Writing Platform
 
-A modern, feature-rich blogging platform built specifically for the Cowrywise Ambassador Writing Group. Built with **Astro**, **MongoDB**, **Clerk Authentication**, and **ImageKit** for a complete content management experience.
+A modern, feature-rich blogging platform built specifically for the Cowrywise Ambassador Writing Group. Built with **Astro**, **Redis**, **Clerk Authentication**, and **ImageKit** for a complete content management experience.
 
 ## ✨ Features
 
@@ -32,7 +32,7 @@ A modern, feature-rich blogging platform built specifically for the Cowrywise Am
 - **CDN Delivery** for fast loading times
 
 ### 📊 **Database-Powered**
-- **MongoDB** for scalable data storage
+- **Redis** (Upstash) for high-performance data storage
 - **Real-time Content** updates
 - **Advanced Search** and filtering
 - **Performance Analytics** and insights
@@ -56,7 +56,7 @@ A modern, feature-rich blogging platform built specifically for the Cowrywise Am
 
 - **Framework**: Astro 5 (Static Site Generation)
 - **Authentication**: Clerk
-- **Database**: MongoDB
+- **Database**: Redis (Upstash)
 - **Media**: ImageKit
 - **Styling**: Tailwind CSS 4
 - **Deployment**: Vercel
@@ -67,7 +67,7 @@ A modern, feature-rich blogging platform built specifically for the Cowrywise Am
 ### Prerequisites
 
 1. **Node.js** 18+ and npm
-2. **MongoDB** database (Atlas recommended)
+2. **Redis** database (Upstash recommended for serverless)
 3. **Clerk** account for authentication
 4. **ImageKit** account for media management
 
@@ -77,7 +77,8 @@ Create a `.env` file with the following variables:
 
 ```bash
 # Database
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/stack-blog
+REDIS_URL=https://your-redis-url.upstash.io
+REDIS_TOKEN=your-redis-token
 
 # Authentication (Clerk)
 PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
@@ -101,10 +102,8 @@ PUBLIC_SITE_URL=https://your-domain.vercel.app
    npm install
    ```
 
-2. **Set Up Database**
-   ```bash
-   npm run setup:db
-   ```
+2. **Database Setup**
+   Redis will automatically work once you provide the correct `REDIS_URL` and `REDIS_TOKEN` environment variables. No manual setup required!
 
 3. **Start Development**
    ```bash
@@ -128,7 +127,7 @@ PUBLIC_SITE_URL=https://your-domain.vercel.app
 
 Add all the environment variables from your `.env` file to your Vercel project settings:
 
-- `MONGODB_URI`
+- `REDIS_URL` and `REDIS_TOKEN`
 - `PUBLIC_CLERK_PUBLISHABLE_KEY`
 - `CLERK_SECRET_KEY`
 - `IMAGEKIT_PUBLIC_KEY`
@@ -231,7 +230,7 @@ The platform includes comprehensive analytics to track:
 npm run dev          # Start development server
 npm run build        # Build for production
 npm run preview      # Preview production build
-npm run setup:db     # Initialize database indexes
+# No database setup needed - Redis works automatically!
 npm run format       # Format code with Prettier
 npm run lint         # Run ESLint
 ```
