@@ -67,31 +67,45 @@ A modern, feature-rich blogging platform built specifically for the Cowrywise Am
 ### Prerequisites
 
 1. **Node.js** 18+ and npm
-2. **Redis** database (Upstash recommended for serverless)
-3. **Clerk** account for authentication
-4. **ImageKit** account for media management
+2. **Fireworks AI** account for AI features (optional)
 
 ### Environment Variables
 
 Create a `.env` file with the following variables:
 
 ```bash
-# Database
-REDIS_URL=https://your-redis-url.upstash.io
-REDIS_TOKEN=your-redis-token
+# Google Site Verification (Optional)
+PUBLIC_GOOGLE_SITE_VERIFICATION=your_google_site_verification_code_here
 
-# Authentication (Clerk)
-PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
-CLERK_SECRET_KEY=sk_test_your_secret_key_here
-
-# Media Management (ImageKit)
-IMAGEKIT_PUBLIC_KEY=public_your_public_key_here
-IMAGEKIT_PRIVATE_KEY=private_your_private_key_here
-IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/your_imagekit_id
+# Fireworks AI API Key (Optional - for AI rewrite features)
+# Get your API key from: https://fireworks.ai/
+PUBLIC_FIREWORKS_API_KEY=your_fireworks_api_key_here
 
 # Site Configuration
 PUBLIC_SITE_URL=https://your-domain.vercel.app
 ```
+
+### 🤖 AI Features Setup (Optional)
+
+Stack includes powerful AI-powered content enhancement features using Fireworks AI:
+
+1. **Get Fireworks API Key**
+   - Visit [Fireworks AI](https://fireworks.ai/)
+   - Sign up for an account
+   - Get your API key from the dashboard
+
+2. **Add to Vercel Environment Variables**
+   - Go to your Vercel project dashboard
+   - Navigate to Settings → Environment Variables
+   - Add: `PUBLIC_FIREWORKS_API_KEY` = `your_actual_api_key_here`
+
+3. **AI Features Available**
+   - ✨ **Smart Rewrite**: Improve titles and descriptions
+   - 🚀 **Content Enhancement**: Professional content improvement
+   - 📝 **Selection Rewrite**: Rewrite selected text portions
+   - 🎯 **Financial Focus**: Specialized for financial content
+
+**Note**: AI features work in demo mode without an API key, but require the key for actual AI processing.
 
 ### Installation
 
@@ -102,18 +116,17 @@ PUBLIC_SITE_URL=https://your-domain.vercel.app
    npm install
    ```
 
-2. **Database Setup**
-   Redis will automatically work once you provide the correct `REDIS_URL` and `REDIS_TOKEN` environment variables. No manual setup required!
-
-3. **Start Development**
+2. **Start Development**
    ```bash
    npm run dev
    ```
 
-4. **Access Admin Panel**
+3. **Access Admin Panel**
    - Visit `http://localhost:4321/admin`
-   - Sign in with your Clerk account
+   - Use password: `admin123` or `cowrywise2024`
    - Start creating content!
+
+**That's it!** No database setup required - everything works with localStorage.
 
 ## 🔧 Deployment
 

@@ -1,4 +1,4 @@
-import { defineConfig } from "astro/config";
+import { defineConfig, envField } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import sitemap from "@astrojs/sitemap";
 import remarkToc from "remark-toc";
@@ -50,7 +50,20 @@ export default defineConfig({
     responsiveStyles: true,
     layout: "constrained",
   },
-
+  env: {
+    schema: {
+      PUBLIC_GOOGLE_SITE_VERIFICATION: envField.string({
+        context: "client",
+        access: "public",
+        optional: true,
+      }),
+      PUBLIC_FIREWORKS_API_KEY: envField.string({
+        context: "client", 
+        access: "public",
+        optional: true,
+      }),
+    },
+  },
   experimental: {
     preserveScriptOrder: true,
   },
