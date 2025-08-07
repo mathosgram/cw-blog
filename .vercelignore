@@ -1,0 +1,7 @@
+src/pages/api/
+*.mjs
+.vercel/
+node_modules/
+.env*
+dist/
+.astro/
