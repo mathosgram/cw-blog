@@ -4,7 +4,7 @@ import sitemap from "@astrojs/sitemap";
 import remarkToc from "remark-toc";
 import remarkCollapse from "remark-collapse";
 import clerk from "@clerk/astro";
-import vercel from "@astrojs/vercel";
+
 import {
   transformerNotationDiff,
   transformerNotationHighlight,
