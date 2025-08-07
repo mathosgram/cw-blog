@@ -344,7 +344,7 @@ import { SITE } from "@/config";
   await clerk.load();
 
   interface BlogPost {
-    _id: string;
+    id: string;
     title: string;
     description: string;
     content: string;
@@ -360,7 +360,7 @@ import { SITE } from "@/config";
   }
 
   interface MediaFile {
-    _id: string;
+    id: string;
     fileName: string;
     url: string;
     thumbnailUrl?: string;
@@ -370,7 +370,7 @@ import { SITE } from "@/config";
   }
 
   class AdminPanel {
-    private sessionToken: string | null = null;
+
 
     constructor() {
       this.init();
@@ -387,11 +387,7 @@ import { SITE } from "@/config";
     }
 
     async initializePanel() {
-      // Get session token
-      const session = clerk.session;
-      if (session) {
-        this.sessionToken = await session.getToken();
-      }
+      // Session will be handled automatically via cookies
 
       // Show admin content
       document.getElementById('auth-check')?.classList.add('hidden');
@@ -535,10 +531,8 @@ import { SITE } from "@/config";
 
           const response = await fetch('/api/upload', {
             method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${this.sessionToken}`
-            },
-            body: formData
+            body: formData,
+            credentials: 'include'
           });
 
           if (response.ok) {
@@ -567,9 +561,7 @@ import { SITE } from "@/config";
     async loadPosts() {
       try {
         const response = await fetch('/api/posts?published=false', {
-          headers: {
-            'Authorization': `Bearer ${this.sessionToken}`
-          }
+          credentials: 'include'
         });
         
         if (response.ok) {
@@ -607,8 +599,8 @@ import { SITE } from "@/config";
               </div>
             </div>
             <div class="flex space-x-2 ml-4">
-              <button onclick="adminPanel.editPost('${post._id}')" class="text-sm transition-colors" style="color: var(--color-accent);" onmouseover="this.style.opacity='0.8';" onmouseout="this.style.opacity='1';">Edit</button>
-              <button onclick="adminPanel.deletePost('${post._id}')" class="text-red-500 hover:text-red-600 text-sm">Delete</button>
+              <button onclick="adminPanel.editPost('${post.id}')" class="text-sm transition-colors" style="color: var(--color-accent);" onmouseover="this.style.opacity='0.8';" onmouseout="this.style.opacity='1';">Edit</button>
+              <button onclick="adminPanel.deletePost('${post.id}')" class="text-red-500 hover:text-red-600 text-sm">Delete</button>
             </div>
           </div>
         </div>
@@ -618,14 +610,12 @@ import { SITE } from "@/config";
     async loadMedia() {
       try {
         const response = await fetch('/api/upload', {
-          headers: {
-            'Authorization': `Bearer ${this.sessionToken}`
-          }
+          credentials: 'include'
         });
         
         if (response.ok) {
           const data = await response.json();
-          this.displayMedia(data.data.media);
+          this.displayMedia(data.data || []);
         }
       } catch (error) {
         console.error('Error loading media:', error);
@@ -654,7 +644,7 @@ import { SITE } from "@/config";
           <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center">
             <div class="opacity-0 group-hover:opacity-100 transition-opacity space-x-2">
               <button onclick="adminPanel.insertMedia('${media.url}')" class="px-2 py-1 bg-accent text-white text-xs rounded">Insert</button>
-              <button onclick="adminPanel.deleteMedia('${media._id}')" class="px-2 py-1 bg-red-500 text-white text-xs rounded">Delete</button>
+              <button onclick="adminPanel.deleteMedia('${media.id}')" class="px-2 py-1 bg-red-500 text-white text-xs rounded">Delete</button>
             </div>
           </div>
           <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white text-xs p-2 truncate">
@@ -679,10 +669,8 @@ import { SITE } from "@/config";
         
         const uploadResponse = await fetch('/api/upload', {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${this.sessionToken}`
-          },
-          body: uploadData
+          body: uploadData,
+          credentials: 'include'
         });
         
         if (uploadResponse.ok) {
@@ -705,24 +693,26 @@ import { SITE } from "@/config";
         const response = await fetch('/api/posts', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.sessionToken}`
+            'Content-Type': 'application/json'
           },
-          body: JSON.stringify(postData)
+          body: JSON.stringify(postData),
+          credentials: 'include'
         });
 
         if (response.ok) {
+
           this.showNotification('Post published successfully!', 'success');
           form.reset();
           this.loadPosts();
           this.updateAnalytics();
         } else {
           const error = await response.json();
+          console.error('API Error:', error);
           this.showNotification(error.error || 'Failed to publish post', 'error');
         }
       } catch (error) {
         console.error('Error publishing post:', error);
-        this.showNotification('Failed to publish post', 'error');
+        this.showNotification('Network error: Failed to publish post', 'error');
       }
     }
 
@@ -739,13 +729,13 @@ import { SITE } from "@/config";
       try {
         const [allPostsResponse, draftsResponse, mediaResponse] = await Promise.all([
           fetch('/api/posts?published=true', {
-            headers: { 'Authorization': `Bearer ${this.sessionToken}` }
+            credentials: 'include'
           }),
           fetch('/api/posts?published=false', {
-            headers: { 'Authorization': `Bearer ${this.sessionToken}` }
+            credentials: 'include'
           }),
           fetch('/api/upload', {
-            headers: { 'Authorization': `Bearer ${this.sessionToken}` }
+            credentials: 'include'
           })
         ]);
 
@@ -811,10 +801,10 @@ import { SITE } from "@/config";
         const response = await fetch('/api/posts', {
           method: 'DELETE',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.sessionToken}`
+            'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ id })
+          body: JSON.stringify({ id }),
+          credentials: 'include'
         });
 
         if (response.ok) {
@@ -835,10 +825,10 @@ import { SITE } from "@/config";
         const response = await fetch('/api/upload', {
           method: 'DELETE',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.sessionToken}`
+            'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ id })
+          body: JSON.stringify({ id }),
+          credentials: 'include'
         });
 
         if (response.ok) {
