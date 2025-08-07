@@ -3,35 +3,43 @@ layout: ../layouts/AboutLayout.astro
 title: "About"
 ---
 
-AstroPaper is a minimal, accessible and SEO-friendly blog theme built with [Astro](https://astro.build/) and [Tailwind CSS](https://tailwindcss.com/).
+Stack is the official writing platform for the Cowrywise Ambassador Writing Group, bringing together passionate financial writers and educators dedicated to promoting financial literacy across Nigeria.
 
-![Astro Paper](public/astropaper-og.jpg)
+![Stack - Cowrywise Ambassador Writing Group](public/stack-og.jpg)
 
-AstroPaper provides a solid foundation for blogs, or even portfolios\_ with full markdown support, built-in dark mode, and a clean layout that works out-of-the-box.
+Our mission is to democratize financial knowledge by sharing insights, stories, and practical guidance that help Nigerians make informed financial decisions and build sustainable wealth.
 
-The blog posts in this theme also serve as guides, docs or example articles\_ making AstroPaper a flexible starting point for your next content-driven site.
+## Our Vision
 
-## Features
+We believe that financial literacy is the foundation of economic empowerment. Through Stack, our ambassadors create content that:
 
-AstroPaper comes with a set of useful features that make content publishing easy and effective:
+- Makes complex financial concepts accessible to everyone
+- Shares real-world investment strategies and experiences  
+- Promotes a culture of saving and smart money management
+- Builds confidence in financial decision-making
+- Inspires the next generation of financially savvy Nigerians
 
-- SEO-friendly
-- Fast performance
-- Light & dark mode
-- Highly customizable
-- Organizable blog posts
-- Responsive & accessible
-- Static search with [PageFind](https://pagefind.app/)
-- Automatic social image generation
+## What We Offer
 
-and so much more.
+Stack provides a comprehensive platform where our ambassador writers share:
 
-## Show your support
+- **Investment Insights** - Learn about various investment opportunities and strategies
+- **Personal Finance Stories** - Real experiences from people building wealth  
+- **Financial Education** - Beginner-friendly guides to money management
+- **Market Analysis** - Understanding Nigerian and global financial markets
+- **Success Stories** - Inspiring journeys of financial growth and independence
 
-If you like [AstroPaper](https://github.com/satnaing/astro-paper), consider giving it a star ⭐️.
+## The Cowrywise Ambassador Program
 
-Found a bug 🐛 or have an improvement ✨ in mind? Feel free to open an [issue](https://github.com/satnaing/astro-paper/issues), submit a [pull request](https://github.com/satnaing/astro-paper/pulls) or start a [discussion](https://github.com/satnaing/astro-paper/discussions).
+Our ambassadors are carefully selected financial enthusiasts who are passionate about:
 
-If you find this theme helpful, you can also [sponsor me on GitHub](https://github.com/sponsors/satnaing) or [buy me a coffee](https://buymeacoffee.com/satnaing) to show your support — every penny counts.
+- Educating others about personal finance and investments
+- Building stronger financial communities across Nigeria
+- Sharing knowledge about modern fintech solutions
+- Promoting financial inclusion and accessibility
 
-Kyay zuu! 🙏🏼
+## Join Our Community
+
+Whether you're just starting your financial journey or looking to expand your knowledge, Stack welcomes readers from all backgrounds. Follow our stories, engage with our content, and join the conversation about building a financially empowered Nigeria.
+
+Ready to transform your financial future? Start exploring our content today.
