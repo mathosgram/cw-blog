@@ -8,222 +8,277 @@ import { SITE } from "@/config";
 <Layout title={`Admin Panel - ${SITE.title}`}>
   <Header />
   <main id="main-content" class="min-h-screen">
-    <section class="pt-8 pb-6">
-      <div class="rounded-lg p-8 mb-8" style="background: linear-gradient(to right, color-mix(in srgb, var(--color-accent) 10%, transparent), color-mix(in srgb, var(--color-accent) 5%, transparent));">
-        <h1 class="text-4xl font-bold mb-4" style="color: var(--color-accent);">Admin Panel</h1>
-        <p class="text-foreground/80">
-          Manage and create content for the Cowrywise Ambassador Writing Group
-        </p>
-      </div>
-
-      <!-- Admin Navigation -->
-      <div class="mb-8">
-        <nav class="flex space-x-1 bg-muted rounded-lg p-1">
-          <button 
-            id="posts-tab" 
-            class="admin-tab active flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors"
-          >
-            Posts
-          </button>
-          <button 
-            id="create-tab" 
-            class="admin-tab flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors"
-          >
-            Create New
-          </button>
-          <button 
-            id="drafts-tab" 
-            class="admin-tab flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors"
-          >
-            Drafts
-          </button>
-          <button 
-            id="analytics-tab" 
-            class="admin-tab flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors"
-          >
-            Analytics
-          </button>
-        </nav>
-      </div>
-
-      <!-- Posts Management Tab -->
-      <div id="posts-content" class="admin-content">
-        <div class="bg-background border border-border rounded-lg shadow-sm">
-          <div class="px-6 py-4 border-b border-border">
-            <h2 class="text-xl font-semibold">Published Posts</h2>
-            <p class="text-foreground/60 mt-1">Manage your published content</p>
+    <!-- Login Screen -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center bg-muted/20">
+      <div class="bg-background border border-border rounded-lg shadow-lg p-8 w-full max-w-md">
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold mb-4" style="color: var(--color-accent);">Admin Login</h1>
+          <p class="text-foreground/60">Enter your password to access the admin panel</p>
+        </div>
+        
+        <form id="login-form" class="space-y-6">
+          <div>
+            <label for="password" class="block text-sm font-medium text-foreground mb-2">
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent/50"
+              placeholder="Enter admin password..."
+              required
+            />
           </div>
-          <div class="p-6">
-            <div class="space-y-4" id="posts-list">
-              <!-- Posts will be loaded here -->
-              <div class="text-center py-8 text-foreground/60">
-                <p>Loading posts...</p>
+          
+          <div id="error-message" class="hidden text-red-500 text-sm text-center">
+            Incorrect password. Please try again.
+          </div>
+          
+          <button
+            type="submit"
+            class="w-full px-4 py-2 text-white rounded-md transition-colors"
+            style="background-color: var(--color-accent);"
+            onmouseover="this.style.opacity='0.9';"
+            onmouseout="this.style.opacity='1';"
+          >
+            Access Admin Panel
+          </button>
+        </form>
+        
+        <div class="mt-6 text-center">
+          <p class="text-xs text-foreground/40">
+            For security, only authorized personnel can access this area
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Panel Content (Hidden by default) -->
+    <div id="admin-content" class="hidden">
+      <section class="pt-8 pb-6">
+        <div class="rounded-lg p-8 mb-8" style="background: linear-gradient(to right, color-mix(in srgb, var(--color-accent) 10%, transparent), color-mix(in srgb, var(--color-accent) 5%, transparent));">
+          <h1 class="text-4xl font-bold mb-4" style="color: var(--color-accent);">Admin Panel</h1>
+          <p class="text-foreground/80">
+            Manage and create content for the Cowrywise Ambassador Writing Group
+          </p>
+          <button
+            id="logout-btn"
+            class="mt-4 px-4 py-2 text-sm border border-border rounded-md text-foreground hover:bg-muted transition-colors"
+          >
+            Logout
+          </button>
+        </div>
+
+        <!-- Admin Navigation -->
+        <div class="mb-8">
+          <nav class="flex space-x-1 bg-muted rounded-lg p-1">
+            <button 
+              id="posts-tab" 
+              class="admin-tab active flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors"
+            >
+              Posts
+            </button>
+            <button 
+              id="create-tab" 
+              class="admin-tab flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors"
+            >
+              Create New
+            </button>
+            <button 
+              id="drafts-tab" 
+              class="admin-tab flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors"
+            >
+              Drafts
+            </button>
+            <button 
+              id="analytics-tab" 
+              class="admin-tab flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors"
+            >
+              Analytics
+            </button>
+          </nav>
+        </div>
+
+        <!-- Posts Management Tab -->
+        <div id="posts-content" class="admin-content">
+          <div class="bg-background border border-border rounded-lg shadow-sm">
+            <div class="px-6 py-4 border-b border-border">
+              <h2 class="text-xl font-semibold">Published Posts</h2>
+              <p class="text-foreground/60 mt-1">Manage your published content</p>
+            </div>
+            <div class="p-6">
+              <div class="space-y-4" id="posts-list">
+                <!-- Posts will be loaded here -->
+                <div class="text-center py-8 text-foreground/60">
+                  <p>Loading posts...</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Create New Post Tab -->
-      <div id="create-content" class="admin-content hidden">
-        <div class="bg-background border border-border rounded-lg shadow-sm">
-          <div class="px-6 py-4 border-b border-border">
-            <h2 class="text-xl font-semibold">Create New Post</h2>
-            <p class="text-foreground/60 mt-1">Write and publish a new blog post</p>
-          </div>
-          <div class="p-6">
-            <form id="create-post-form" class="space-y-6">
-              <div>
-                <label for="title" class="block text-sm font-medium text-foreground mb-2">
-                  Title
-                </label>
-                <input
-                  type="text"
-                  id="title"
-                  name="title"
-                  class="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent/50"
-                  placeholder="Enter post title..."
-                />
-              </div>
-
-              <div>
-                <label for="description" class="block text-sm font-medium text-foreground mb-2">
-                  Description
-                </label>
-                <textarea
-                  id="description"
-                  name="description"
-                  rows="3"
-                  class="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent/50"
-                  placeholder="Brief description of the post..."
-                ></textarea>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Create New Post Tab -->
+        <div id="create-content" class="admin-content hidden">
+          <div class="bg-background border border-border rounded-lg shadow-sm">
+            <div class="px-6 py-4 border-b border-border">
+              <h2 class="text-xl font-semibold">Create New Post</h2>
+              <p class="text-foreground/60 mt-1">Write and publish a new blog post</p>
+            </div>
+            <div class="p-6">
+              <form id="create-post-form" class="space-y-6">
                 <div>
-                  <label for="author" class="block text-sm font-medium text-foreground mb-2">
-                    Author
+                  <label for="title" class="block text-sm font-medium text-foreground mb-2">
+                    Title
                   </label>
                   <input
                     type="text"
-                    id="author"
-                    name="author"
+                    id="title"
+                    name="title"
                     class="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent/50"
-                    placeholder="Author name..."
+                    placeholder="Enter post title..."
                   />
                 </div>
+
                 <div>
-                  <label for="tags" class="block text-sm font-medium text-foreground mb-2">
-                    Tags
+                  <label for="description" class="block text-sm font-medium text-foreground mb-2">
+                    Description
                   </label>
-                  <input
-                    type="text"
-                    id="tags"
-                    name="tags"
+                  <textarea
+                    id="description"
+                    name="description"
+                    rows="3"
                     class="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent/50"
-                    placeholder="investing, savings, finance..."
-                  />
+                    placeholder="Brief description of the post..."
+                  ></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label for="author" class="block text-sm font-medium text-foreground mb-2">
+                      Author
+                    </label>
+                    <input
+                      type="text"
+                      id="author"
+                      name="author"
+                      class="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent/50"
+                      placeholder="Author name..."
+                    />
+                  </div>
+                  <div>
+                    <label for="tags" class="block text-sm font-medium text-foreground mb-2">
+                      Tags
+                    </label>
+                    <input
+                      type="text"
+                      id="tags"
+                      name="tags"
+                      class="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent/50"
+                      placeholder="investing, savings, finance..."
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label class="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="featured"
+                      name="featured"
+                      class="w-4 h-4 border-border rounded"
+                      style="accent-color: var(--color-accent);"
+                    />
+                    <span class="text-sm text-foreground">Feature this post</span>
+                  </label>
+                </div>
+
+                <div>
+                  <label for="content" class="block text-sm font-medium text-foreground mb-2">
+                    Content
+                  </label>
+                  <textarea
+                    id="content"
+                    name="content"
+                    rows="15"
+                    class="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent/50 font-mono text-sm"
+                    placeholder="Write your post content in Markdown format..."
+                  ></textarea>
+                </div>
+
+                <div class="flex justify-end space-x-4">
+                  <button
+                    type="button"
+                    id="save-draft"
+                    class="px-4 py-2 border border-border rounded-md text-foreground hover:bg-muted transition-colors"
+                  >
+                    Save as Draft
+                  </button>
+                  <button
+                    type="submit"
+                    class="px-4 py-2 text-white rounded-md transition-colors"
+                    style="background-color: var(--color-accent);"
+                    onmouseover="this.style.backgroundColor = 'var(--color-accent)'; this.style.opacity = '0.9';"
+                    onmouseout="this.style.backgroundColor = 'var(--color-accent)'; this.style.opacity = '1';"
+                  >
+                    Publish Post
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Drafts Tab -->
+        <div id="drafts-content" class="admin-content hidden">
+          <div class="bg-background border border-border rounded-lg shadow-sm">
+            <div class="px-6 py-4 border-b border-border">
+              <h2 class="text-xl font-semibold">Draft Posts</h2>
+              <p class="text-foreground/60 mt-1">Continue working on unpublished posts</p>
+            </div>
+            <div class="p-6">
+              <div class="space-y-4" id="drafts-list">
+                <!-- Drafts will be loaded here -->
+                <div class="text-center py-8 text-foreground/60">
+                  <p>No drafts found. Start writing to create your first draft!</p>
                 </div>
               </div>
-
-              <div>
-                <label class="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="featured"
-                    name="featured"
-                    class="w-4 h-4 border-border rounded"
-                    style="accent-color: var(--color-accent);"
-                  />
-                  <span class="text-sm text-foreground">Feature this post</span>
-                </label>
-              </div>
-
-              <div>
-                <label for="content" class="block text-sm font-medium text-foreground mb-2">
-                  Content
-                </label>
-                <textarea
-                  id="content"
-                  name="content"
-                  rows="15"
-                  class="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent/50 font-mono text-sm"
-                  placeholder="Write your post content in Markdown format..."
-                ></textarea>
-              </div>
-
-              <div class="flex justify-end space-x-4">
-                <button
-                  type="button"
-                  id="save-draft"
-                  class="px-4 py-2 border border-border rounded-md text-foreground hover:bg-muted transition-colors"
-                >
-                  Save as Draft
-                </button>
-                <button
-                  type="submit"
-                  class="px-4 py-2 text-white rounded-md transition-colors"
-                  style="background-color: var(--color-accent);"
-                  onmouseover="this.style.backgroundColor = 'var(--color-accent)'; this.style.opacity = '0.9';"
-                  onmouseout="this.style.backgroundColor = 'var(--color-accent)'; this.style.opacity = '1';"
-                >
-                  Publish Post
-                </button>
-              </div>
-            </form>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Drafts Tab -->
-      <div id="drafts-content" class="admin-content hidden">
-        <div class="bg-background border border-border rounded-lg shadow-sm">
-          <div class="px-6 py-4 border-b border-border">
-            <h2 class="text-xl font-semibold">Draft Posts</h2>
-            <p class="text-foreground/60 mt-1">Continue working on unpublished posts</p>
-          </div>
-          <div class="p-6">
-            <div class="space-y-4" id="drafts-list">
-              <!-- Drafts will be loaded here -->
+        <!-- Analytics Tab -->
+        <div id="analytics-content" class="admin-content hidden">
+          <div class="bg-background border border-border rounded-lg shadow-sm">
+            <div class="px-6 py-4 border-b border-border">
+              <h2 class="text-xl font-semibold">Content Analytics</h2>
+              <p class="text-foreground/60 mt-1">Track your content performance</p>
+            </div>
+            <div class="p-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="rounded-lg p-6 text-center" style="background-color: color-mix(in srgb, var(--color-accent) 5%, transparent);">
+                  <div class="text-2xl font-bold" style="color: var(--color-accent);">4</div>
+                  <div class="text-sm text-foreground/60">Total Posts</div>
+                </div>
+                <div class="rounded-lg p-6 text-center" style="background-color: color-mix(in srgb, var(--color-accent) 5%, transparent);">
+                  <div class="text-2xl font-bold" style="color: var(--color-accent);">3</div>
+                  <div class="text-sm text-foreground/60">Featured Posts</div>
+                </div>
+                <div class="rounded-lg p-6 text-center" style="background-color: color-mix(in srgb, var(--color-accent) 5%, transparent);">
+                  <div class="text-2xl font-bold" style="color: var(--color-accent);">0</div>
+                  <div class="text-sm text-foreground/60">Draft Posts</div>
+                </div>
+              </div>
+              
               <div class="text-center py-8 text-foreground/60">
-                <p>No drafts found. Start writing to create your first draft!</p>
+                <p>Detailed analytics coming soon...</p>
+                <p class="text-sm mt-2">Track views, engagement, and more</p>
               </div>
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- Analytics Tab -->
-      <div id="analytics-content" class="admin-content hidden">
-        <div class="bg-background border border-border rounded-lg shadow-sm">
-          <div class="px-6 py-4 border-b border-border">
-            <h2 class="text-xl font-semibold">Content Analytics</h2>
-            <p class="text-foreground/60 mt-1">Track your content performance</p>
-          </div>
-          <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div class="rounded-lg p-6 text-center" style="background-color: color-mix(in srgb, var(--color-accent) 5%, transparent);">
-                <div class="text-2xl font-bold" style="color: var(--color-accent);">12</div>
-                <div class="text-sm text-foreground/60">Total Posts</div>
-              </div>
-              <div class="rounded-lg p-6 text-center" style="background-color: color-mix(in srgb, var(--color-accent) 5%, transparent);">
-                <div class="text-2xl font-bold" style="color: var(--color-accent);">3</div>
-                <div class="text-sm text-foreground/60">Featured Posts</div>
-              </div>
-              <div class="rounded-lg p-6 text-center" style="background-color: color-mix(in srgb, var(--color-accent) 5%, transparent);">
-                <div class="text-2xl font-bold" style="color: var(--color-accent);">5</div>
-                <div class="text-sm text-foreground/60">Draft Posts</div>
-              </div>
-            </div>
-            
-            <div class="text-center py-8 text-foreground/60">
-              <p>Detailed analytics coming soon...</p>
-              <p class="text-sm mt-2">Track views, engagement, and more</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+      </section>
+    </div>
   </main>
   <Footer />
 </Layout>
@@ -240,9 +295,101 @@ import { SITE } from "@/config";
     saved: string;
   }
 
+  interface PublishedPost {
+    id: number;
+    title: string;
+    description: string;
+    author: string;
+    tags: string;
+    content: string;
+    featured: boolean;
+    publishedDate: string;
+    slug: string;
+  }
+
+  // Authentication
+  class Authentication {
+    private readonly ADMIN_PASSWORD = "stack2024"; // Change this to a secure password
+    private readonly AUTH_KEY = "stack_admin_auth";
+
+    isAuthenticated(): boolean {
+      return sessionStorage.getItem(this.AUTH_KEY) === "authenticated";
+    }
+
+    authenticate(password: string): boolean {
+      if (password === this.ADMIN_PASSWORD) {
+        sessionStorage.setItem(this.AUTH_KEY, "authenticated");
+        return true;
+      }
+      return false;
+    }
+
+    logout(): void {
+      sessionStorage.removeItem(this.AUTH_KEY);
+    }
+  }
+
   // Admin panel functionality
   class AdminPanel {
+    private auth: Authentication;
+
     constructor() {
+      this.auth = new Authentication();
+      this.initAuth();
+    }
+
+    initAuth() {
+      const loginScreen = document.getElementById('login-screen');
+      const adminContent = document.getElementById('admin-content');
+      const loginForm = document.getElementById('login-form') as HTMLFormElement;
+      const logoutBtn = document.getElementById('logout-btn');
+      const errorMessage = document.getElementById('error-message');
+
+      // Check if already authenticated
+      if (this.auth.isAuthenticated()) {
+        this.showAdminPanel();
+      } else {
+        this.showLoginScreen();
+      }
+
+      // Handle login form submission
+      loginForm?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const passwordInput = document.getElementById('password') as HTMLInputElement;
+        const password = passwordInput.value;
+
+        if (this.auth.authenticate(password)) {
+          this.showAdminPanel();
+          errorMessage?.classList.add('hidden');
+        } else {
+          errorMessage?.classList.remove('hidden');
+          passwordInput.value = '';
+        }
+      });
+
+      // Handle logout
+      logoutBtn?.addEventListener('click', () => {
+        this.auth.logout();
+        this.showLoginScreen();
+      });
+    }
+
+    showLoginScreen() {
+      const loginScreen = document.getElementById('login-screen');
+      const adminContent = document.getElementById('admin-content');
+      
+      loginScreen?.classList.remove('hidden');
+      adminContent?.classList.add('hidden');
+    }
+
+    showAdminPanel() {
+      const loginScreen = document.getElementById('login-screen');
+      const adminContent = document.getElementById('admin-content');
+      
+      loginScreen?.classList.add('hidden');
+      adminContent?.classList.remove('hidden');
+      
+      // Initialize admin panel features
       this.initTabs();
       this.initForms();
       this.loadPosts();
@@ -290,17 +437,43 @@ import { SITE } from "@/config";
       const formData = new FormData(form);
       const postData = Object.fromEntries(formData);
       
-      // In a real implementation, this would send to your backend
-      console.log('Publishing post:', postData);
+      // Generate slug from title
+      const slug = (postData.title as string)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+      
+      // Save to published posts
+      const publishedPosts = JSON.parse(localStorage.getItem('publishedPosts') || '[]') as PublishedPost[];
+      const newPost: PublishedPost = {
+        id: Date.now(),
+        title: postData.title as string,
+        description: postData.description as string,
+        author: postData.author as string,
+        tags: postData.tags as string,
+        content: postData.content as string,
+        featured: postData.featured === 'on',
+        publishedDate: new Date().toISOString(),
+        slug: slug
+      };
+      
+      publishedPosts.push(newPost);
+      localStorage.setItem('publishedPosts', JSON.stringify(publishedPosts));
       
       // Show success message
-      this.showNotification('Post published successfully!', 'success');
+      this.showNotification('Post published successfully! It will appear on the frontend.', 'success');
       
       // Clear form
       form.reset();
       
       // Refresh posts list
       this.loadPosts();
+      
+      // Update analytics
+      this.updateAnalytics();
+      
+      // Trigger frontend update
+      this.triggerFrontendUpdate();
     }
 
     saveDraft() {
@@ -310,7 +483,6 @@ import { SITE } from "@/config";
       const formData = new FormData(form);
       const draftData = Object.fromEntries(formData);
       
-      // In a real implementation, this would save to localStorage or backend
       const drafts = JSON.parse(localStorage.getItem('drafts') || '[]') as Draft[];
       drafts.push({
         ...draftData,
@@ -321,51 +493,42 @@ import { SITE } from "@/config";
       
       this.showNotification('Draft saved successfully!', 'success');
       this.loadDrafts();
+      this.updateAnalytics();
     }
 
     loadPosts() {
-      // In a real implementation, this would fetch from your CMS or API
+      const publishedPosts = JSON.parse(localStorage.getItem('publishedPosts') || '[]') as PublishedPost[];
       const postsContainer = document.getElementById('posts-list');
       if (!postsContainer) return;
       
-      postsContainer.innerHTML = `
-        <div class="space-y-4">
-          <div class="border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors">
-            <div class="flex justify-between items-start">
-              <div>
-                <h3 class="font-semibold" style="color: var(--color-accent);">Getting Started with Investment</h3>
-                <p class="text-sm text-foreground/60 mt-1">A beginner's guide to building wealth through smart investments...</p>
-                <div class="flex items-center space-x-4 mt-2 text-xs text-foreground/60">
-                  <span>Published: Jan 15, 2024</span>
-                  <span>Author: Sarah Adebayo</span>
-                  <span class="px-2 py-1 rounded" style="background-color: color-mix(in srgb, var(--color-accent) 10%, transparent); color: var(--color-accent);">Featured</span>
-                </div>
-              </div>
-              <div class="flex space-x-2">
-                <button class="text-sm transition-colors" style="color: var(--color-accent);" onmouseover="this.style.opacity='0.8';" onmouseout="this.style.opacity='1';">Edit</button>
-                <button class="text-red-500 hover:text-red-600 text-sm">Delete</button>
+      if (publishedPosts.length === 0) {
+        postsContainer.innerHTML = `
+          <div class="text-center py-8 text-foreground/60">
+            <p>No published posts yet. Create your first post!</p>
+          </div>
+        `;
+        return;
+      }
+
+      postsContainer.innerHTML = publishedPosts.map((post: PublishedPost) => `
+        <div class="border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="font-semibold" style="color: var(--color-accent);">${post.title}</h3>
+              <p class="text-sm text-foreground/60 mt-1">${post.description}</p>
+              <div class="flex items-center space-x-4 mt-2 text-xs text-foreground/60">
+                <span>Published: ${new Date(post.publishedDate).toLocaleDateString()}</span>
+                <span>Author: ${post.author}</span>
+                ${post.featured ? '<span class="px-2 py-1 rounded" style="background-color: color-mix(in srgb, var(--color-accent) 10%, transparent); color: var(--color-accent);">Featured</span>' : ''}
               </div>
             </div>
-          </div>
-          
-          <div class="border border-border rounded-lg p-4 hover:bg-muted/50 transition-colors">
-            <div class="flex justify-between items-start">
-              <div>
-                <h3 class="font-semibold" style="color: var(--color-accent);">Building Your Emergency Fund</h3>
-                <p class="text-sm text-foreground/60 mt-1">Why every Nigerian needs an emergency fund and how to build one...</p>
-                <div class="flex items-center space-x-4 mt-2 text-xs text-foreground/60">
-                  <span>Published: Jan 12, 2024</span>
-                  <span>Author: Michael Okafor</span>
-                </div>
-              </div>
-              <div class="flex space-x-2">
-                <button class="text-sm transition-colors" style="color: var(--color-accent);" onmouseover="this.style.opacity='0.8';" onmouseout="this.style.opacity='1';">Edit</button>
-                <button class="text-red-500 hover:text-red-600 text-sm">Delete</button>
-              </div>
+            <div class="flex space-x-2">
+              <button onclick="(window as any).adminPanel.editPost(${post.id})" class="text-sm transition-colors" style="color: var(--color-accent);" onmouseover="this.style.opacity='0.8';" onmouseout="this.style.opacity='1';">Edit</button>
+              <button onclick="(window as any).adminPanel.deletePost(${post.id})" class="text-red-500 hover:text-red-600 text-sm">Delete</button>
             </div>
           </div>
         </div>
-      `;
+      `).join('');
     }
 
     loadDrafts() {
@@ -402,6 +565,51 @@ import { SITE } from "@/config";
       `).join('');
     }
 
+    editPost(id: number) {
+      const publishedPosts = JSON.parse(localStorage.getItem('publishedPosts') || '[]') as PublishedPost[];
+      const post = publishedPosts.find((p: PublishedPost) => p.id === id);
+      
+      if (post) {
+        // Switch to create tab
+        const createTab = document.getElementById('create-tab');
+        createTab?.click();
+        
+        // Fill form with post data
+        const titleInput = document.getElementById('title') as HTMLInputElement;
+        const descInput = document.getElementById('description') as HTMLTextAreaElement;
+        const authorInput = document.getElementById('author') as HTMLInputElement;
+        const tagsInput = document.getElementById('tags') as HTMLInputElement;
+        const contentInput = document.getElementById('content') as HTMLTextAreaElement;
+        const featuredInput = document.getElementById('featured') as HTMLInputElement;
+        
+        if (titleInput) titleInput.value = post.title || '';
+        if (descInput) descInput.value = post.description || '';
+        if (authorInput) authorInput.value = post.author || '';
+        if (tagsInput) tagsInput.value = post.tags || '';
+        if (contentInput) contentInput.value = post.content || '';
+        if (featuredInput) featuredInput.checked = post.featured;
+        
+        // Remove the post from published posts (it will be re-added when republished)
+        this.deletePost(id, false);
+      }
+    }
+
+    deletePost(id: number, confirm: boolean = true) {
+      if (confirm && !window.confirm('Are you sure you want to delete this post?')) {
+        return;
+      }
+      
+      const publishedPosts = JSON.parse(localStorage.getItem('publishedPosts') || '[]') as PublishedPost[];
+      const updatedPosts = publishedPosts.filter((p: PublishedPost) => p.id !== id);
+      localStorage.setItem('publishedPosts', JSON.stringify(updatedPosts));
+      this.loadPosts();
+      this.updateAnalytics();
+      
+      if (confirm) {
+        this.showNotification('Post deleted successfully!', 'success');
+      }
+    }
+
     editDraft(id: number) {
       const drafts = JSON.parse(localStorage.getItem('drafts') || '[]') as Draft[];
       const draft = drafts.find((d: Draft) => d.id === id);
@@ -425,17 +633,53 @@ import { SITE } from "@/config";
         if (tagsInput) tagsInput.value = draft.tags || '';
         if (contentInput) contentInput.value = draft.content || '';
         if (featuredInput) featuredInput.checked = draft.featured === 'on';
+        
+        // Remove draft after loading into form
+        this.deleteDraft(id, false);
       }
     }
 
-    deleteDraft(id: number) {
-      if (confirm('Are you sure you want to delete this draft?')) {
-        const drafts = JSON.parse(localStorage.getItem('drafts') || '[]') as Draft[];
-        const updatedDrafts = drafts.filter((d: Draft) => d.id !== id);
-        localStorage.setItem('drafts', JSON.stringify(updatedDrafts));
-        this.loadDrafts();
+    deleteDraft(id: number, confirm: boolean = true) {
+      if (confirm && !window.confirm('Are you sure you want to delete this draft?')) {
+        return;
+      }
+      
+      const drafts = JSON.parse(localStorage.getItem('drafts') || '[]') as Draft[];
+      const updatedDrafts = drafts.filter((d: Draft) => d.id !== id);
+      localStorage.setItem('drafts', JSON.stringify(updatedDrafts));
+      this.loadDrafts();
+      this.updateAnalytics();
+      
+      if (confirm) {
         this.showNotification('Draft deleted successfully!', 'success');
       }
+    }
+
+    updateAnalytics() {
+      const publishedPosts = JSON.parse(localStorage.getItem('publishedPosts') || '[]') as PublishedPost[];
+      const drafts = JSON.parse(localStorage.getItem('drafts') || '[]') as Draft[];
+      
+      const totalPosts = publishedPosts.length;
+      const featuredPosts = publishedPosts.filter(p => p.featured).length;
+      const totalDrafts = drafts.length;
+      
+      // Update analytics display
+      const analyticsElements = document.querySelectorAll('#analytics-content .text-2xl');
+      if (analyticsElements[0]) analyticsElements[0].textContent = totalPosts.toString();
+      if (analyticsElements[1]) analyticsElements[1].textContent = featuredPosts.toString();
+      if (analyticsElements[2]) analyticsElements[2].textContent = totalDrafts.toString();
+    }
+
+    triggerFrontendUpdate() {
+      // Dispatch a custom event that the frontend can listen to
+      window.dispatchEvent(new CustomEvent('postsUpdated'));
+      
+      // Also trigger storage event for cross-tab updates
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'publishedPosts',
+        newValue: localStorage.getItem('publishedPosts'),
+        storageArea: localStorage
+      }));
     }
 
     showNotification(message: string, type: string = 'info') {
