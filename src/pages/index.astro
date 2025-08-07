@@ -251,4 +251,12 @@ const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
       displayDynamicPosts();
     }
   });
+  
+  // Listen for custom refresh events (for same-tab updates)
+  window.addEventListener('refreshPosts', function() {
+    displayDynamicPosts();
+  });
+  
+  // Also check for posts every 2 seconds (fallback)
+  setInterval(displayDynamicPosts, 2000);
 </script>

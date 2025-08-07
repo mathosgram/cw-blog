@@ -57,7 +57,7 @@ export default defineConfig({
         access: "public",
         optional: true,
       }),
-      PUBLIC_FIREWORKS_API_KEY: envField.string({
+      PUBLIC_IMOOGLE_API_KEY: envField.string({
         context: "client", 
         access: "public",
         optional: true,

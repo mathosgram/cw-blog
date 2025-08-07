@@ -77,9 +77,9 @@ Create a `.env` file with the following variables:
 # Google Site Verification (Optional)
 PUBLIC_GOOGLE_SITE_VERIFICATION=your_google_site_verification_code_here
 
-# Fireworks AI API Key (Optional - for AI rewrite features)
-# Get your API key from: https://fireworks.ai/
-PUBLIC_FIREWORKS_API_KEY=your_fireworks_api_key_here
+# ImoogleAI API Key (Optional - for AI rewrite features)
+# Get your API key from: https://imoogle.ai/
+PUBLIC_IMOOGLE_API_KEY=your_imoogle_api_key_here
 
 # Site Configuration
 PUBLIC_SITE_URL=https://your-domain.vercel.app
@@ -87,17 +87,17 @@ PUBLIC_SITE_URL=https://your-domain.vercel.app
 
 ### 🤖 AI Features Setup (Optional)
 
-Stack includes powerful AI-powered content enhancement features using Fireworks AI:
+Stack includes powerful AI-powered content enhancement features using ImoogleAI:
 
-1. **Get Fireworks API Key**
-   - Visit [Fireworks AI](https://fireworks.ai/)
+1. **Get ImoogleAI API Key**
+   - Visit [ImoogleAI](https://imoogle.ai/)
    - Sign up for an account
    - Get your API key from the dashboard
 
 2. **Add to Vercel Environment Variables**
    - Go to your Vercel project dashboard
    - Navigate to Settings → Environment Variables
-   - Add: `PUBLIC_FIREWORKS_API_KEY` = `your_actual_api_key_here`
+   - Add: `PUBLIC_IMOOGLE_API_KEY` = `your_actual_api_key_here`
 
 3. **AI Features Available**
    - ✨ **Smart Rewrite**: Improve titles and descriptions
