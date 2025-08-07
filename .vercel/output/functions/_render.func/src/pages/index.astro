@@ -1,0 +1,231 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+
+import LinkButton from "@/components/LinkButton.astro";
+import Card from "@/components/Card.astro";
+import Hr from "@/components/Hr.astro";
+import getSortedPosts from "@/utils/getSortedPosts";
+import IconRss from "@/assets/icons/IconRss.svg";
+import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
+import { SITE } from "@/config";
+
+import { getBlogPosts } from "@/lib/redis";
+
+// Get static posts from content collection
+const posts = await getCollection("blog");
+const sortedPosts = getSortedPosts(posts);
+const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
+const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
+
+// Get dynamic posts from Redis database
+let dynamicPosts: any[] = [];
+try {
+  const dbPosts = await getBlogPosts({ 
+    published: true, 
+    limit: 10 
+  });
+  
+  dynamicPosts = dbPosts.map(post => ({
+    ...post,
+    id: post.id,
+  }));
+} catch (error) {
+  console.error('Error fetching dynamic posts:', error);
+}
+
+const hasDynamicPosts = dynamicPosts.length > 0;
+const dynamicFeaturedPosts = dynamicPosts.filter((post: any) => post.featured);
+const dynamicRecentPosts = dynamicPosts.filter((post: any) => !post.featured);
+---
+
+<Layout>
+  <Header />
+  <main id="main-content" data-layout="index">
+    <section id="hero" class="pt-8 pb-6">
+      <h1 class="my-4 inline-block text-4xl font-bold sm:my-8 sm:text-5xl">
+        Welcome to Stack
+      </h1>
+      <a
+        target="_blank"
+        href="/rss.xml"
+        class="inline-block"
+        aria-label="rss feed"
+        title="RSS Feed"
+      >
+        <IconRss
+          width={20}
+          height={20}
+          class="scale-125 stroke-accent stroke-3 rtl:-rotate-90"
+        />
+        <span class="sr-only">RSS Feed</span>
+      </a>
+
+      <p>
+        Stack is the official writing platform for the Cowrywise Ambassador Writing Group. 
+        Here, our ambassadors share insights on personal finance, investment strategies, 
+        and financial literacy to help Nigerians build wealth and achieve financial freedom.
+      </p>
+      <p class="mt-2">
+        Join our community of financial writers and discover stories that inspire smart money decisions.
+        Together, we're building a financially literate Nigeria, one story at a time.
+      </p>
+
+    </section>
+
+    <Hr />
+
+    {hasDynamicPosts ? (
+      <!-- Dynamic Posts from Database -->
+      <div>
+        {dynamicFeaturedPosts.length > 0 && (
+          <section id="featured" class="pt-12 pb-6">
+            <h2 class="text-2xl font-semibold tracking-wide">Featured Posts</h2>
+            <ul class="space-y-4">
+              {dynamicFeaturedPosts.map(post => (
+                <li class="border border-border rounded-lg p-6 hover:shadow-md transition-shadow bg-background">
+                  <article>
+                    <header>
+                      <h3 class="text-xl font-semibold mb-2">
+                        <a 
+                          href={`/posts/${post.slug}/`} 
+                          class="hover:text-accent transition-colors"
+                          style="color: var(--color-accent);"
+                        >
+                          {post.title}
+                        </a>
+                      </h3>
+                      <div class="flex items-center gap-4 text-sm text-foreground/60 mb-3">
+                        <time datetime={post.publishedAt}>
+                          {new Date(post.publishedAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </time>
+                        <span>by {post.author}</span>
+                        <span class="px-2 py-1 rounded text-xs" style="background-color: color-mix(in srgb, var(--color-accent) 10%, transparent); color: var(--color-accent);">
+                          Featured
+                        </span>
+                      </div>
+                    </header>
+                    <p class="text-foreground/80 mb-3">{post.description}</p>
+                    {post.tags && post.tags.length > 0 && (
+                      <div class="flex flex-wrap gap-1 mt-2">
+                        {post.tags.map((tag: string) => (
+                          <span class="text-xs px-2 py-1 rounded-full bg-muted text-foreground/70">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </article>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+        
+        {dynamicFeaturedPosts.length > 0 && dynamicRecentPosts.length > 0 && <Hr />}
+
+        {dynamicRecentPosts.length > 0 && (
+          <section id="recent-posts" class="pt-12 pb-6">
+            <h2 class="text-2xl font-semibold tracking-wide">Latest Posts</h2>
+            <ul class="space-y-4">
+              {dynamicRecentPosts.slice(0, SITE.postPerIndex).map(post => (
+                <li class="border border-border rounded-lg p-6 hover:shadow-md transition-shadow bg-background">
+                  <article>
+                    <header>
+                      <h3 class="text-xl font-semibold mb-2">
+                        <a 
+                          href={`/posts/${post.slug}/`} 
+                          class="hover:text-accent transition-colors"
+                          style="color: var(--color-accent);"
+                        >
+                          {post.title}
+                        </a>
+                      </h3>
+                      <div class="flex items-center gap-4 text-sm text-foreground/60 mb-3">
+                        <time datetime={post.publishedAt}>
+                          {new Date(post.publishedAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </time>
+                        <span>by {post.author}</span>
+                      </div>
+                    </header>
+                    <p class="text-foreground/80 mb-3">{post.description}</p>
+                    {post.tags && post.tags.length > 0 && (
+                      <div class="flex flex-wrap gap-1 mt-2">
+                        {post.tags.map((tag: string) => (
+                          <span class="text-xs px-2 py-1 rounded-full bg-muted text-foreground/70">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </article>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+      </div>
+    ) : (
+      <!-- Fallback to Static Posts -->
+      <div>
+        {
+          featuredPosts.length > 0 && (
+            <>
+              <section id="featured" class="pt-12 pb-6">
+                <h2 class="text-2xl font-semibold tracking-wide">Featured</h2>
+                <ul>
+                  {featuredPosts.map(data => (
+                    <Card variant="h3" {...data} />
+                  ))}
+                </ul>
+              </section>
+              {recentPosts.length > 0 && <Hr />}
+            </>
+          )
+        }
+
+        {
+          recentPosts.length > 0 && (
+            <section id="recent-posts" class="pt-12 pb-6">
+              <h2 class="text-2xl font-semibold tracking-wide">Recent Posts</h2>
+              <ul>
+                {recentPosts.map(
+                  (data, index) =>
+                    index < SITE.postPerIndex && <Card variant="h3" {...data} />
+                )}
+              </ul>
+            </section>
+          )
+        }
+      </div>
+    )}
+
+    <div class="my-8 text-center">
+      <LinkButton href="/posts/">
+        All Posts
+        <IconArrowRight class="inline-block rtl:-rotate-180" />
+      </LinkButton>
+    </div>
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  document.addEventListener("astro:page-load", () => {
+    const indexLayout = (document.querySelector("#main-content") as HTMLElement)
+      ?.dataset?.layout;
+    if (indexLayout) {
+      sessionStorage.setItem("backUrl", "/");
+    }
+  });
+</script>

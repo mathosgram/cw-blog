@@ -3,6 +3,8 @@ import { uploadFile, deleteFile } from '../../lib/imagekit';
 import { createMediaFile, getMediaFiles, deleteMediaFile, getMediaFileById } from '../../lib/redis';
 import { authenticateRequest } from '../../lib/auth';
 
+export const prerender = false;
+
 export const POST: APIRoute = async ({ request }) => {
   try {
     // Simple auth check for static mode

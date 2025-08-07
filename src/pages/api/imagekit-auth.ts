@@ -2,6 +2,8 @@ import type { APIRoute } from 'astro';
 import { getAuthenticationParameters } from '../../lib/imagekit';
 import { authenticateRequest } from '../../lib/auth';
 
+export const prerender = false;
+
 export const GET: APIRoute = async ({ request }) => {
   try {
     // Authenticate request

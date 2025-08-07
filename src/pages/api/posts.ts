@@ -10,6 +10,8 @@ import {
 } from '../../lib/redis';
 import { authenticateRequest, clerkClient } from '../../lib/auth';
 
+export const prerender = false;
+
 export const GET: APIRoute = async ({ request }) => {
   try {
     const searchParams = new URL(request.url).searchParams;
