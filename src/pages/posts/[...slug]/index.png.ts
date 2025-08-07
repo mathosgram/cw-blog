@@ -28,7 +28,7 @@ export const GET: APIRoute = async ({ props }) => {
   }
 
   return new Response(
-    await generateOgImageForPost(props as CollectionEntry<"blog">),
+    (await generateOgImageForPost(props as CollectionEntry<"blog">)) as BodyInit,
     {
       headers: { "Content-Type": "image/png" },
     }

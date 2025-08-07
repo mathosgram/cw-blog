@@ -1,140 +1,295 @@
-# Stack - Cowrywise Ambassador Writing Group Platform
+# Stack - Cowrywise Ambassador Writing Platform
 
-Stack is the official writing platform for the Cowrywise Ambassador Writing Group, designed to help ambassadors share financial literacy content, investment insights, and personal finance stories with the Nigerian community.
+A modern, feature-rich blogging platform built specifically for the Cowrywise Ambassador Writing Group. Built with **Astro**, **Redis**, **Clerk Authentication**, and **ImageKit** for a complete content management experience.
 
-## 🚀 Features
+## ✨ Features
 
-- **Beautiful Design**: Modern, responsive design with Cowrywise brand colors
-- **Admin Panel**: Complete content management system for ambassadors
-- **Rich Writing Experience**: Markdown support with live preview
-- **SEO Optimized**: Built-in SEO features for better content discovery
-- **Fast Performance**: Optimized for speed and accessibility
-- **Dark/Light Mode**: Automatic theme switching
-- **Content Management**: Draft system, post scheduling, and analytics
-- **Social Sharing**: Easy content sharing across platforms
+### 🎨 **Beautiful Design**
+- Professional blue color scheme aligned with financial services
+- Responsive design that works on all devices
+- Clean, modern interface optimized for financial content
+- Dark/Light mode support with automatic theme switching
 
-## 🎯 Built For
+### 🔐 **Secure Authentication**
+- **Clerk** integration for robust user authentication
+- Role-based access control (Admin, Author, Editor)
+- Secure session management
+- Social login options
 
-- **Cowrywise Ambassadors**: Content creators and financial educators
-- **Financial Writers**: Professionals sharing investment insights
-- **Community Leaders**: Building financial literacy in Nigeria
+### 📝 **Professional Admin Panel**
+- **Rich Text Editor** with Markdown support
+- **Media Management** with drag-and-drop uploads
+- **Real-time Preview** for content editing
+- **Draft System** for work-in-progress posts
+- **Analytics Dashboard** tracking content performance
+- **Post Scheduling** and publication management
 
-## 💻 Admin Panel Features
+### 🖼️ **Advanced Media Management**
+- **ImageKit** integration for optimized image/video uploads
+- **Automatic Optimization** and responsive images
+- **Video Support** with streaming capabilities
+- **Media Library** with search and organization
+- **CDN Delivery** for fast loading times
 
-The admin panel (`/admin`) includes:
+### 📊 **Database-Powered**
+- **Redis** (Upstash) for high-performance data storage
+- **Real-time Content** updates
+- **Advanced Search** and filtering
+- **Performance Analytics** and insights
+- **Backup and Recovery** capabilities
 
-- **Posts Management**: View, edit, and delete published content
-- **Create New Posts**: Rich markdown editor with preview
-- **Draft System**: Save work in progress and continue later
-- **Analytics Dashboard**: Track content performance
-- **Content Organization**: Tags, categories, and featured posts
+### 🚀 **SEO & Performance**
+- **Perfect Lighthouse Scores** across all metrics
+- **Automatic Sitemap** generation
+- **RSS Feed** for content syndication
+- **Open Graph** images for social sharing
+- **Fast Search** with Pagefind integration
 
-## 🎨 Design System
+## 🏗️ Built For
 
-Stack uses Cowrywise's brand colors:
-- **Primary Green**: `#008b2c` (light mode), `#00c041` (dark mode)
-- **Background**: Clean, readable layouts optimized for long-form content
-- **Typography**: Monospace font for technical readability
+- **Cowrywise Ambassadors** creating financial content
+- **Financial Writers** sharing insights and strategies  
+- **Community Leaders** building financial literacy
+- **Content Managers** organizing publication workflows
 
-## 🛠 Technology Stack
+## 🛠️ Technology Stack
 
-- **Framework**: Astro 5.x
-- **Styling**: Tailwind CSS 4.x
-- **Content**: Markdown with frontmatter
-- **Search**: PageFind integration
-- **Analytics**: Built-in content analytics
-- **Deployment**: Static site generation
-
-## 📝 Content Guidelines
-
-### For Ambassadors
-
-1. **Financial Education**: Focus on accessible financial concepts
-2. **Personal Stories**: Share real experiences and lessons learned
-3. **Investment Insights**: Provide practical investment guidance
-4. **Nigerian Context**: Address local financial challenges and opportunities
-
-### Writing Style
-
-- Use clear, accessible language
-- Include practical examples
-- Add relevant Cowrywise product mentions where appropriate
-- Focus on actionable advice
+- **Framework**: Astro 5 (Static Site Generation)
+- **Authentication**: Clerk
+- **Database**: Redis (Upstash)
+- **Media**: ImageKit
+- **Styling**: Tailwind CSS 4
+- **Deployment**: Vercel
+- **Search**: Pagefind
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
-- pnpm (recommended) or npm
+
+1. **Node.js** 18+ and npm
+2. **Redis** database (Upstash recommended for serverless)
+3. **Clerk** account for authentication
+4. **ImageKit** account for media management
+
+### Environment Variables
+
+Create a `.env` file with the following variables:
+
+```bash
+# Database
+REDIS_URL=https://your-redis-url.upstash.io
+REDIS_TOKEN=your-redis-token
+
+# Authentication (Clerk)
+PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
+CLERK_SECRET_KEY=sk_test_your_secret_key_here
+
+# Media Management (ImageKit)
+IMAGEKIT_PUBLIC_KEY=public_your_public_key_here
+IMAGEKIT_PRIVATE_KEY=private_your_private_key_here
+IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/your_imagekit_id
+
+# Site Configuration
+PUBLIC_SITE_URL=https://your-domain.vercel.app
+```
 
 ### Installation
 
-```bash
-# Clone the repository
-git clone <repository-url>
-cd stack
+1. **Clone and Install**
+   ```bash
+   git clone <repository-url>
+   cd stack
+   npm install
+   ```
 
-# Install dependencies
-pnpm install
+2. **Database Setup**
+   Redis will automatically work once you provide the correct `REDIS_URL` and `REDIS_TOKEN` environment variables. No manual setup required!
 
-# Start development server
-pnpm dev
+3. **Start Development**
+   ```bash
+   npm run dev
+   ```
 
-# Build for production
-pnpm build
-```
+4. **Access Admin Panel**
+   - Visit `http://localhost:4321/admin`
+   - Sign in with your Clerk account
+   - Start creating content!
 
-### Creating Content
+## 🔧 Deployment
 
-1. Visit `/admin` to access the admin panel
-2. Use the "Create New" tab to write posts
-3. Save drafts or publish immediately
-4. Organize content with tags and categories
+### Vercel Deployment
 
-### Content Structure
+1. **Connect Repository** to Vercel
+2. **Add Environment Variables** in Vercel dashboard
+3. **Deploy** - Vercel will automatically build and deploy
 
-Posts are written in Markdown with frontmatter:
+### Environment Variables in Vercel
 
-```markdown
----
-title: "Your Post Title"
-description: "Brief description for SEO"
-author: "Your Name"
-pubDate: "2024-01-15"
-tags: ["investing", "savings", "nigeria"]
-featured: true
----
+Add all the environment variables from your `.env` file to your Vercel project settings:
 
-Your content here...
-```
+- `REDIS_URL` and `REDIS_TOKEN`
+- `PUBLIC_CLERK_PUBLISHABLE_KEY`
+- `CLERK_SECRET_KEY`
+- `IMAGEKIT_PUBLIC_KEY`
+- `IMAGEKIT_PRIVATE_KEY`
+- `IMAGEKIT_URL_ENDPOINT`
+- `PUBLIC_SITE_URL`
+
+## 📝 Admin Panel Features
+
+### Content Management
+- **Rich Editor** with Markdown support and live preview
+- **Media Insertion** directly into posts
+- **Draft System** for saving work in progress
+- **Publishing Control** with immediate or scheduled publishing
+- **Tag Management** for content organization
+
+### Media Library
+- **Drag & Drop** file uploads
+- **Image Optimization** automatic resizing and compression
+- **Video Support** with streaming capabilities
+- **Organization Tools** search, filter, and categorize media
+- **Usage Tracking** see where media files are used
+
+### Analytics Dashboard
+- **Content Metrics** views, engagement, and performance
+- **Publishing Stats** total posts, featured content, drafts
+- **Media Usage** storage and bandwidth analytics
+- **User Activity** author contributions and activity
+
+### User Management
+- **Role-Based Access** Admin, Author, Editor permissions
+- **Profile Management** author bios and social links
+- **Activity Logs** track user actions and changes
+
+## 🎯 Content Guidelines
+
+### Writing Standards
+- **Financial Focus**: All content should relate to personal finance, investing, or wealth building
+- **Nigerian Context**: Use local examples, currency (₦), and relevant financial institutions
+- **Actionable Advice**: Provide practical, implementable financial guidance
+- **Accessible Language**: Write for all literacy levels, explain complex terms
+
+### Content Types
+- **Investment Guides**: Stock market, mutual funds, real estate
+- **Savings Strategies**: Emergency funds, goal-based saving, high-yield accounts
+- **Personal Finance**: Budgeting, debt management, financial planning
+- **Financial Technology**: Apps, tools, and digital banking solutions
+
+## 🎨 Design System
+
+### Color Palette
+- **Primary Blue**: `#1e40af` (Professional, trustworthy)
+- **Accent Blue**: `#3b82f6` (Interactive elements)
+- **Success Green**: `#10b981` (Positive actions)
+- **Warning Orange**: `#f59e0b` (Cautions)
+- **Error Red**: `#ef4444` (Errors, deletions)
+
+### Typography
+- **Headings**: System font stack for clarity
+- **Body**: Optimized for readability across devices
+- **Code**: Monospace for technical content
 
 ## 📊 Analytics
 
-Track content performance through the admin panel:
-- Post views and engagement
-- Popular content identification
-- Author performance metrics
-- Community interaction stats
+The platform includes comprehensive analytics to track:
+
+- **Content Performance**: Views, engagement, and sharing metrics
+- **User Behavior**: Reading patterns and popular content
+- **Publishing Metrics**: Post frequency and author productivity
+- **Media Usage**: Most popular images and videos
 
 ## 🤝 Contributing
 
-1. Write high-quality financial content
-2. Follow the style guide
-3. Use the admin panel for content management
-4. Engage with community feedback
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/AmazingFeature`)
+3. **Commit** your changes (`git commit -m 'Add some AmazingFeature'`)
+4. **Push** to the branch (`git push origin feature/AmazingFeature`)
+5. **Open** a Pull Request
+
+## 📋 API Documentation
+
+### Posts API
+- `GET /api/posts` - Fetch published posts with pagination
+- `POST /api/posts` - Create new post (requires authentication)
+- `PUT /api/posts` - Update existing post (requires authentication)
+- `DELETE /api/posts` - Delete post (requires authentication)
+
+### Media API
+- `GET /api/upload` - Fetch media files
+- `POST /api/upload` - Upload new media file (requires authentication)
+- `DELETE /api/upload` - Delete media file (requires authentication)
+
+### Authentication API
+- `GET /api/imagekit-auth` - Get ImageKit authentication parameters
+
+## 🧪 Development
+
+### Commands
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run preview      # Preview production build
+# No database setup needed - Redis works automatically!
+npm run format       # Format code with Prettier
+npm run lint         # Run ESLint
+```
+
+### Database Schema
+
+#### Posts Collection
+```typescript
+interface BlogPost {
+  _id: ObjectId;
+  title: string;
+  description: string;
+  content: string;
+  author: string;
+  authorId: string; // Clerk user ID
+  tags: string[];
+  featured: boolean;
+  published: boolean;
+  slug: string;
+  coverImage?: string;
+  images?: string[];
+  videos?: string[];
+  createdAt: Date;
+  updatedAt: Date;
+  publishedAt?: Date;
+  views?: number;
+}
+```
+
+#### Media Collection
+```typescript
+interface MediaFile {
+  _id: ObjectId;
+  fileName: string;
+  fileId: string; // ImageKit file ID
+  url: string;
+  thumbnailUrl?: string;
+  fileType: 'image' | 'video';
+  size: number;
+  uploadedBy: string; // Clerk user ID
+  uploadedAt: Date;
+  postId?: string;
+}
+```
 
 ## 🎯 Mission
 
-Building a financially literate Nigeria through accessible, practical, and inspiring financial content. Every post contributes to empowering Nigerians to make better financial decisions and build sustainable wealth.
+**Building Financial Literacy Through Quality Content**
+
+Stack serves as the digital foundation for the Cowrywise Ambassador Writing Group, empowering financial writers to share knowledge that builds wealth and financial independence across Nigeria.
 
 ## 📞 Support
 
-For technical issues or content questions:
-- Email: ambassadors@cowrywise.com
-- Slack: Cowrywise Ambassador Community
+For questions, issues, or contributions:
+
+- **Email**: ambassadors@cowrywise.com
+- **Community**: [Cowrywise Ambassador Program](https://cowrywise.com/ambassadors)
+- **Issues**: Create an issue in this repository
 
 ---
 
-**Built with ❤️ for the Cowrywise Ambassador Writing Group**
-
-*Empowering financial literacy, one story at a time.*
+**Stack** - *Empowering Financial Literacy, One Story at a Time* 🚀
