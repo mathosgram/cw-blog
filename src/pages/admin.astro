@@ -64,6 +64,12 @@ import { SITE } from "@/config";
               ✍️ Create
             </button>
             <button 
+              id="media-tab" 
+              class="admin-tab flex-1 min-w-0 px-3 py-2 text-sm font-medium rounded-md transition-colors text-center"
+            >
+              📁 Media
+            </button>
+            <button 
               id="analytics-tab" 
               class="admin-tab flex-1 min-w-0 px-3 py-2 text-sm font-medium rounded-md transition-colors text-center"
             >
@@ -90,13 +96,23 @@ import { SITE } from "@/config";
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
                   <label for="title" class="block text-sm font-medium text-foreground mb-2">Title</label>
-                  <input 
-                    type="text" 
-                    id="title" 
-                    name="title"
-                    required
-                    class="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent bg-background text-foreground"
-                  />
+                  <div class="flex gap-2">
+                    <input 
+                      type="text" 
+                      id="title" 
+                      name="title"
+                      required
+                      class="flex-1 px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent bg-background text-foreground"
+                    />
+                    <button 
+                      type="button"
+                      id="rewrite-title-btn"
+                      class="px-3 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors text-sm"
+                      title="AI Rewrite"
+                    >
+                      ✨
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label for="author" class="block text-sm font-medium text-foreground mb-2">Author</label>
@@ -112,24 +128,73 @@ import { SITE } from "@/config";
 
               <div>
                 <label for="description" class="block text-sm font-medium text-foreground mb-2">Description</label>
-                <textarea 
-                  id="description" 
-                  name="description"
-                  required
-                  rows="3"
-                  class="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent bg-background text-foreground"
-                ></textarea>
+                <div class="flex gap-2">
+                  <textarea 
+                    id="description" 
+                    name="description"
+                    required
+                    rows="3"
+                    class="flex-1 px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent bg-background text-foreground"
+                  ></textarea>
+                  <button 
+                    type="button"
+                    id="rewrite-description-btn"
+                    class="px-3 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors text-sm"
+                    title="AI Rewrite"
+                  >
+                    ✨
+                  </button>
+                </div>
               </div>
 
               <div>
                 <label for="content" class="block text-sm font-medium text-foreground mb-2">Content (Markdown)</label>
-                <textarea 
-                  id="content" 
-                  name="content"
-                  required
-                  rows="10"
-                  class="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent bg-background text-foreground font-mono text-sm"
-                ></textarea>
+                <div class="border border-border rounded-md overflow-hidden">
+                  <!-- Editor Toolbar -->
+                  <div class="bg-muted border-b border-border p-2 flex flex-wrap gap-2">
+                    <button type="button" class="editor-btn" data-action="bold" title="Bold">
+                      <strong>B</strong>
+                    </button>
+                    <button type="button" class="editor-btn" data-action="italic" title="Italic">
+                      <em>I</em>
+                    </button>
+                    <button type="button" class="editor-btn" data-action="heading" title="Heading">
+                      H1
+                    </button>
+                    <button type="button" class="editor-btn" data-action="link" title="Link">
+                      🔗
+                    </button>
+                    <button type="button" class="editor-btn" data-action="list" title="List">
+                      📝
+                    </button>
+                    <button type="button" class="editor-btn" data-action="quote" title="Quote">
+                      💬
+                    </button>
+                    <div class="border-l border-border mx-2"></div>
+                    <button type="button" id="upload-image-btn" class="editor-btn" title="Upload Image">
+                      🖼️
+                    </button>
+                    <button type="button" id="upload-video-btn" class="editor-btn" title="Upload Video">
+                      🎥
+                    </button>
+                    <div class="border-l border-border mx-2"></div>
+                    <button type="button" id="ai-rewrite-content-btn" class="editor-btn bg-purple-500 text-white" title="AI Rewrite Selection">
+                      ✨ AI
+                    </button>
+                    <button type="button" id="ai-improve-btn" class="editor-btn bg-blue-500 text-white" title="AI Improve Content">
+                      🚀 Improve
+                    </button>
+                  </div>
+                  
+                  <textarea 
+                    id="content" 
+                    name="content"
+                    required
+                    rows="15"
+                    class="w-full px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent bg-background text-foreground font-mono text-sm resize-y"
+                    placeholder="Write your post content in Markdown..."
+                  ></textarea>
+                </div>
               </div>
 
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -174,6 +239,25 @@ import { SITE } from "@/config";
           </div>
         </div>
 
+        <!-- Media Tab -->
+        <div id="media-content" class="tab-content hidden">
+          <div class="bg-muted rounded-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-xl font-semibold text-foreground">Media Library</h2>
+              <button 
+                id="upload-media-btn"
+                class="px-4 py-2 bg-accent text-white rounded-md hover:opacity-90 transition-opacity"
+              >
+                Upload Files
+              </button>
+            </div>
+            
+            <div id="media-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+              <!-- Media files will be loaded here -->
+            </div>
+          </div>
+        </div>
+
         <!-- Analytics Tab -->
         <div id="analytics-content" class="tab-content hidden">
           <div class="bg-muted rounded-lg p-6">
@@ -199,6 +283,41 @@ import { SITE } from "@/config";
           </div>
         </div>
       </div>
+
+      <!-- Media Upload Modal -->
+      <div id="media-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-background border border-border rounded-lg p-6 max-w-2xl w-full mx-4">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-foreground">Upload Media</h3>
+            <button id="close-media-modal" class="text-foreground/60 hover:text-foreground">✕</button>
+          </div>
+          
+          <div id="upload-area" class="border-2 border-dashed border-border rounded-lg p-8 text-center mb-4 hover:border-accent transition-colors">
+            <div class="text-4xl mb-2">📁</div>
+            <p class="text-foreground/60 mb-2">Drag and drop files here or click to browse</p>
+            <p class="text-sm text-foreground/40">Supports images (JPEG, PNG, WebP, GIF) and videos (MP4, WebM) up to 10MB</p>
+            <input type="file" id="file-input" multiple accept="image/*,video/*" class="hidden">
+          </div>
+          
+          <div id="upload-progress" class="hidden">
+            <div class="w-full bg-muted rounded-full h-2 mb-2">
+              <div id="progress-bar" class="bg-accent h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <p class="text-sm text-foreground/60 text-center">Uploading...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Processing Modal -->
+      <div id="ai-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-background border border-border rounded-lg p-6 max-w-md w-full mx-4">
+          <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
+            <h3 class="text-lg font-semibold text-foreground mb-2">AI Processing</h3>
+            <p class="text-foreground/60">Enhancing your content...</p>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
   <Footer />
@@ -216,9 +335,75 @@ import { SITE } from "@/config";
   .admin-tab:not(.active):hover {
     background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
   }
+  .editor-btn {
+    padding: 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.25rem;
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-size: 0.875rem;
+    transition: all 0.2s;
+  }
+  .editor-btn:hover {
+    background: var(--color-accent);
+    color: white;
+  }
+  .media-item {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .media-item:hover {
+    transform: scale(1.02);
+  }
+  .media-item img,
+  .media-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .media-item .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .media-item:hover .overlay {
+    opacity: 1;
+  }
+  .media-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .media-actions button {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .copy-btn {
+    background: var(--color-accent);
+    color: white;
+  }
+  .delete-btn {
+    background: #ef4444;
+    color: white;
+  }
 </style>
 
 <script>
+  // Add Fireworks API key - you'll need to set this
+  const FIREWORKS_API_KEY = 'your_fireworks_api_key_here'; // Replace with actual key
+
   interface BlogPost {
     id: string;
     title: string;
@@ -232,7 +417,16 @@ import { SITE } from "@/config";
     updatedAt: string;
   }
 
-  class SimpleAdminPanel {
+  interface MediaFile {
+    id: string;
+    name: string;
+    url: string;
+    type: 'image' | 'video';
+    size: number;
+    uploadedAt: string;
+  }
+
+  class AdvancedAdminPanel {
     private isAuthenticated = false;
 
     constructor() {
@@ -245,6 +439,10 @@ import { SITE } from "@/config";
         this.showAdminPanel();
       }
 
+      this.setupEventListeners();
+    }
+
+    setupEventListeners() {
       // Auth form
       const loginForm = document.getElementById('login-form') as HTMLFormElement;
       loginForm?.addEventListener('submit', (e) => this.handleLogin(e));
@@ -256,6 +454,7 @@ import { SITE } from "@/config";
       // Tabs
       document.getElementById('posts-tab')?.addEventListener('click', () => this.showTab('posts'));
       document.getElementById('create-tab')?.addEventListener('click', () => this.showTab('create'));
+      document.getElementById('media-tab')?.addEventListener('click', () => this.showTab('media'));
       document.getElementById('analytics-tab')?.addEventListener('click', () => this.showTab('analytics'));
 
       // Forms
@@ -265,10 +464,335 @@ import { SITE } from "@/config";
       const saveDraftBtn = document.getElementById('save-draft-btn');
       saveDraftBtn?.addEventListener('click', () => this.saveDraft());
 
-      if (this.isAuthenticated) {
-        this.loadPosts();
-        this.updateAnalytics();
+      // Editor buttons
+      this.setupEditorButtons();
+
+      // AI rewrite buttons
+      document.getElementById('rewrite-title-btn')?.addEventListener('click', () => this.aiRewriteField('title'));
+      document.getElementById('rewrite-description-btn')?.addEventListener('click', () => this.aiRewriteField('description'));
+      document.getElementById('ai-rewrite-content-btn')?.addEventListener('click', () => this.aiRewriteSelection());
+      document.getElementById('ai-improve-btn')?.addEventListener('click', () => this.aiImproveContent());
+
+      // Media upload
+      this.setupMediaUpload();
+    }
+
+    setupEditorButtons() {
+      const editorBtns = document.querySelectorAll('.editor-btn');
+      const contentTextarea = document.getElementById('content') as HTMLTextAreaElement;
+
+      editorBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const action = btn.getAttribute('data-action');
+          if (action) {
+            this.insertMarkdown(action, contentTextarea);
+          }
+        });
+      });
+    }
+
+    insertMarkdown(action: string, textarea: HTMLTextAreaElement) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selectedText = textarea.value.substring(start, end);
+      let replacement = '';
+
+      switch (action) {
+        case 'bold':
+          replacement = `**${selectedText || 'bold text'}**`;
+          break;
+        case 'italic':
+          replacement = `*${selectedText || 'italic text'}*`;
+          break;
+        case 'heading':
+          replacement = `## ${selectedText || 'Heading'}`;
+          break;
+        case 'link':
+          replacement = `[${selectedText || 'link text'}](url)`;
+          break;
+        case 'list':
+          replacement = `\n- ${selectedText || 'list item'}\n- ${selectedText || 'list item'}`;
+          break;
+        case 'quote':
+          replacement = `> ${selectedText || 'quote text'}`;
+          break;
       }
+
+      textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+      textarea.focus();
+      textarea.setSelectionRange(start + replacement.length, start + replacement.length);
+    }
+
+    setupMediaUpload() {
+      const uploadBtn = document.getElementById('upload-media-btn');
+      const modal = document.getElementById('media-modal');
+      const closeBtn = document.getElementById('close-media-modal');
+      const uploadArea = document.getElementById('upload-area');
+      const fileInput = document.getElementById('file-input') as HTMLInputElement;
+
+      uploadBtn?.addEventListener('click', () => {
+        modal?.classList.remove('hidden');
+        modal?.classList.add('flex');
+      });
+
+      closeBtn?.addEventListener('click', () => {
+        modal?.classList.add('hidden');
+        modal?.classList.remove('flex');
+      });
+
+      uploadArea?.addEventListener('click', () => fileInput?.click());
+
+      // Drag and drop
+      uploadArea?.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('border-accent');
+      });
+
+      uploadArea?.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('border-accent');
+      });
+
+      uploadArea?.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('border-accent');
+        const files = e.dataTransfer?.files;
+        if (files) {
+          this.uploadFiles(Array.from(files));
+        }
+      });
+
+      fileInput?.addEventListener('change', (e) => {
+        const files = (e.target as HTMLInputElement).files;
+        if (files) {
+          this.uploadFiles(Array.from(files));
+        }
+      });
+
+      // Media upload buttons in editor
+      document.getElementById('upload-image-btn')?.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = (e) => {
+          const files = (e.target as HTMLInputElement).files;
+          if (files) {
+            this.uploadFiles(Array.from(files), true);
+          }
+        };
+        input.click();
+      });
+
+      document.getElementById('upload-video-btn')?.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'video/*';
+        input.onchange = (e) => {
+          const files = (e.target as HTMLInputElement).files;
+          if (files) {
+            this.uploadFiles(Array.from(files), true);
+          }
+        };
+        input.click();
+      });
+    }
+
+    async uploadFiles(files: File[], insertInEditor = false) {
+      const progressContainer = document.getElementById('upload-progress');
+      const progressBar = document.getElementById('progress-bar');
+      
+      progressContainer?.classList.remove('hidden');
+      
+      try {
+        const uploadedFiles: MediaFile[] = [];
+        
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          
+          // Validate file
+          if (file.size > 10 * 1024 * 1024) {
+            this.showNotification(`File ${file.name} is too large (max 10MB)`, 'error');
+            continue;
+          }
+
+          // Create file URL (simulate upload)
+          const fileUrl = URL.createObjectURL(file);
+          const mediaFile: MediaFile = {
+            id: Date.now().toString() + Math.random(),
+            name: file.name,
+            url: fileUrl,
+            type: file.type.startsWith('image/') ? 'image' : 'video',
+            size: file.size,
+            uploadedAt: new Date().toISOString()
+          };
+
+          uploadedFiles.push(mediaFile);
+
+          // Update progress
+          const progress = ((i + 1) / files.length) * 100;
+          if (progressBar) {
+            progressBar.style.width = `${progress}%`;
+          }
+
+          // Insert into editor if requested
+          if (insertInEditor) {
+            this.insertMediaInEditor(mediaFile);
+          }
+        }
+
+        // Save to localStorage
+        this.saveMediaFiles(uploadedFiles);
+        
+        // Close modal and refresh media
+        document.getElementById('media-modal')?.classList.add('hidden');
+        this.loadMedia();
+        this.showNotification('Files uploaded successfully!', 'success');
+      } catch (error) {
+        console.error('Upload error:', error);
+        this.showNotification('Upload failed. Please try again.', 'error');
+      } finally {
+        progressContainer?.classList.add('hidden');
+        if (progressBar) {
+          progressBar.style.width = '0%';
+        }
+      }
+    }
+
+    insertMediaInEditor(media: MediaFile) {
+      const textarea = document.getElementById('content') as HTMLTextAreaElement;
+      const markdown = media.type === 'image' 
+        ? `![${media.name}](${media.url})` 
+        : `<video src="${media.url}" controls></video>`;
+      
+      const cursorPos = textarea.selectionStart;
+      textarea.value = textarea.value.substring(0, cursorPos) + '\n\n' + markdown + '\n\n' + textarea.value.substring(cursorPos);
+      textarea.focus();
+    }
+
+    saveMediaFiles(newFiles: MediaFile[]) {
+      const existingFiles = this.getMediaFiles();
+      const allFiles = [...existingFiles, ...newFiles];
+      localStorage.setItem('media_files', JSON.stringify(allFiles));
+    }
+
+    getMediaFiles(): MediaFile[] {
+      const files = localStorage.getItem('media_files');
+      return files ? JSON.parse(files) : [];
+    }
+
+    async aiRewriteField(fieldId: string) {
+      const field = document.getElementById(fieldId) as HTMLInputElement | HTMLTextAreaElement;
+      if (!field || !field.value.trim()) {
+        this.showNotification('Please enter some text first', 'error');
+        return;
+      }
+
+      this.showAIModal();
+      
+      try {
+        const rewrittenText = await this.callFireworksAPI(field.value, 'rewrite');
+        field.value = rewrittenText;
+        this.showNotification('Content rewritten successfully!', 'success');
+      } catch (error) {
+        console.error('AI rewrite error:', error);
+        this.showNotification('AI rewrite failed. Please try again.', 'error');
+      } finally {
+        this.hideAIModal();
+      }
+    }
+
+    async aiRewriteSelection() {
+      const textarea = document.getElementById('content') as HTMLTextAreaElement;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selectedText = textarea.value.substring(start, end);
+
+      if (!selectedText.trim()) {
+        this.showNotification('Please select some text first', 'error');
+        return;
+      }
+
+      this.showAIModal();
+      
+      try {
+        const rewrittenText = await this.callFireworksAPI(selectedText, 'rewrite');
+        textarea.value = textarea.value.substring(0, start) + rewrittenText + textarea.value.substring(end);
+        this.showNotification('Selection rewritten successfully!', 'success');
+      } catch (error) {
+        console.error('AI rewrite error:', error);
+        this.showNotification('AI rewrite failed. Please try again.', 'error');
+      } finally {
+        this.hideAIModal();
+      }
+    }
+
+    async aiImproveContent() {
+      const textarea = document.getElementById('content') as HTMLTextAreaElement;
+      if (!textarea.value.trim()) {
+        this.showNotification('Please enter some content first', 'error');
+        return;
+      }
+
+      this.showAIModal();
+      
+      try {
+        const improvedContent = await this.callFireworksAPI(textarea.value, 'improve');
+        textarea.value = improvedContent;
+        this.showNotification('Content improved successfully!', 'success');
+      } catch (error) {
+        console.error('AI improve error:', error);
+        this.showNotification('AI improvement failed. Please try again.', 'error');
+      } finally {
+        this.hideAIModal();
+      }
+    }
+
+    async callFireworksAPI(text: string, action: 'rewrite' | 'improve'): Promise<string> {
+      // For demo purposes, we'll simulate the API call
+      // In production, you'll need to implement the actual Fireworks API integration
+      
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API delay
+      
+      const prompts = {
+        rewrite: `Please rewrite the following text to make it more engaging and clear while maintaining the original meaning: "${text}"`,
+        improve: `Please improve the following content by making it more professional, engaging, and well-structured for a financial blog: "${text}"`
+      };
+
+      // This is a mock response - replace with actual Fireworks API call
+      if (action === 'rewrite') {
+        return text.split(' ').map(word => 
+          Math.random() > 0.7 ? this.getSynonym(word) : word
+        ).join(' ');
+      } else {
+        return `## Enhanced Content\n\n${text}\n\n**Key Takeaways:**\n- Professional insight added\n- Structure improved\n- Engagement enhanced`;
+      }
+    }
+
+    getSynonym(word: string): string {
+      const synonyms: { [key: string]: string[] } = {
+        'good': ['excellent', 'outstanding', 'remarkable'],
+        'bad': ['poor', 'inadequate', 'subpar'],
+        'big': ['large', 'substantial', 'significant'],
+        'small': ['compact', 'minimal', 'modest'],
+        'money': ['funds', 'capital', 'finances'],
+        'save': ['preserve', 'conserve', 'accumulate'],
+        'invest': ['allocate', 'deploy', 'commit']
+      };
+      
+      const wordLower = word.toLowerCase();
+      const options = synonyms[wordLower];
+      return options ? options[Math.floor(Math.random() * options.length)] : word;
+    }
+
+    showAIModal() {
+      const modal = document.getElementById('ai-modal');
+      modal?.classList.remove('hidden');
+      modal?.classList.add('flex');
+    }
+
+    hideAIModal() {
+      const modal = document.getElementById('ai-modal');
+      modal?.classList.add('hidden');
+      modal?.classList.remove('flex');
     }
 
     handleLogin(e: Event) {
@@ -277,7 +801,6 @@ import { SITE } from "@/config";
       const formData = new FormData(form);
       const password = formData.get('password') as string;
 
-      // Simple password check (in production, this should be server-side)
       if (password === 'admin123' || password === 'cowrywise2024') {
         localStorage.setItem('admin_authenticated', 'true');
         this.showAdminPanel();
@@ -300,12 +823,12 @@ import { SITE } from "@/config";
       document.getElementById('auth-check')?.classList.add('hidden');
       document.getElementById('admin-content')?.classList.remove('hidden');
       this.loadPosts();
+      this.loadMedia();
       this.updateAnalytics();
     }
 
     logout() {
       localStorage.removeItem('admin_authenticated');
-      localStorage.removeItem('blog_posts');
       this.isAuthenticated = false;
       document.getElementById('admin-content')?.classList.add('hidden');
       document.getElementById('auth-check')?.classList.remove('hidden');
@@ -322,9 +845,57 @@ import { SITE } from "@/config";
 
       if (tabName === 'posts') {
         this.loadPosts();
+      } else if (tabName === 'media') {
+        this.loadMedia();
       } else if (tabName === 'analytics') {
         this.updateAnalytics();
       }
+    }
+
+    loadMedia() {
+      const mediaFiles = this.getMediaFiles();
+      const container = document.getElementById('media-grid');
+      if (!container) return;
+
+      if (mediaFiles.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full text-center py-8 text-foreground/60">
+            <p>No media files yet. Upload your first file!</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = mediaFiles.map(media => `
+        <div class="media-item" data-id="${media.id}">
+          ${media.type === 'image' 
+            ? `<img src="${media.url}" alt="${media.name}" loading="lazy">` 
+            : `<video src="${media.url}" muted></video>`
+          }
+          <div class="overlay">
+            <div class="media-actions">
+              <button class="copy-btn" onclick="adminPanel.copyMediaUrl('${media.url}')">Copy URL</button>
+              <button class="delete-btn" onclick="adminPanel.deleteMedia('${media.id}')">Delete</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    copyMediaUrl(url: string) {
+      navigator.clipboard.writeText(url).then(() => {
+        this.showNotification('URL copied to clipboard!', 'success');
+      });
+    }
+
+    deleteMedia(id: string) {
+      if (!confirm('Are you sure you want to delete this media file?')) return;
+      
+      const mediaFiles = this.getMediaFiles();
+      const filteredFiles = mediaFiles.filter(file => file.id !== id);
+      localStorage.setItem('media_files', JSON.stringify(filteredFiles));
+      this.loadMedia();
+      this.showNotification('Media file deleted', 'success');
     }
 
     createPost(e: Event) {
@@ -350,6 +921,12 @@ import { SITE } from "@/config";
       this.showNotification('Post created successfully!', 'success');
       this.loadPosts();
       this.updateAnalytics();
+      
+      // Trigger storage event to update frontend
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'blog_posts',
+        newValue: localStorage.getItem('blog_posts')
+      }));
     }
 
     saveDraft() {
@@ -418,7 +995,6 @@ import { SITE } from "@/config";
       const posts = this.getPosts();
       const post = posts.find(p => p.id === id);
       if (post) {
-        // Fill form with post data
         const form = document.getElementById('create-post-form') as HTMLFormElement;
         (form.querySelector('#title') as HTMLInputElement).value = post.title;
         (form.querySelector('#description') as HTMLTextAreaElement).value = post.description;
@@ -428,10 +1004,7 @@ import { SITE } from "@/config";
         (form.querySelector('#featured') as HTMLInputElement).checked = post.featured;
         (form.querySelector('#published') as HTMLInputElement).checked = post.published;
 
-        // Switch to create tab
         this.showTab('create');
-
-        // Delete old post (will be replaced when form is submitted)
         this.deletePost(id);
       }
     }
@@ -443,6 +1016,12 @@ import { SITE } from "@/config";
       this.loadPosts();
       this.updateAnalytics();
       this.showNotification('Post deleted', 'success');
+      
+      // Trigger storage event to update frontend
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'blog_posts',
+        newValue: localStorage.getItem('blog_posts')
+      }));
     }
 
     updateAnalytics() {
@@ -473,6 +1052,6 @@ import { SITE } from "@/config";
   }
 
   // Initialize admin panel
-  const adminPanel = new SimpleAdminPanel();
+  const adminPanel = new AdvancedAdminPanel();
   (window as any).adminPanel = adminPanel;
 </script>
