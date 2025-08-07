@@ -49,7 +49,7 @@ const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
     <Hr />
 
     <!-- Dynamic Posts Section -->
-    <div id="dynamic-posts-section">
+    <div id="dynamic-posts-section" class="w-full max-w-none overflow-hidden">
       <!-- This will be populated by JavaScript -->
     </div>
 
@@ -151,6 +151,35 @@ const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
     margin: 2rem 0;
     text-align: center;
   }
+  
+  /* Dynamic posts styling */
+  #dynamic-posts-section {
+    transition: opacity 0.3s ease;
+  }
+  
+  #dynamic-posts-section h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+  }
+  
+  #dynamic-posts-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  #dynamic-posts-section li {
+    margin: 1.5rem 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  #dynamic-posts-section a {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+  }
 
 </style>
 
@@ -185,17 +214,17 @@ const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
       
       return `
         <li class="my-6">
-          <div class="inline-block text-lg font-medium text-accent decoration-dashed underline-offset-4">
-            <h3 class="text-lg font-medium decoration-dashed hover:underline" style="view-transition-name: ${slug}">${post.title}</h3>
-          </div>
+          <a href="#" onclick="viewDynamicPost('${post.id}')" class="block text-lg font-medium text-accent decoration-dashed underline-offset-4 focus-visible:no-underline focus-visible:underline-offset-0 cursor-pointer">
+            <h3 class="text-lg font-medium decoration-dashed hover:underline break-words" style="view-transition-name: ${slug}">${post.title}</h3>
+          </a>
           <div class="text-sm opacity-75 mt-1">
             <time>${formattedDate}</time> • by ${post.author}
             ${post.featured ? ' • <span class="text-accent font-medium">Featured</span>' : ''}
           </div>
-          <p class="mt-2">${post.description}</p>
+          <p class="mt-2 text-foreground/80 break-words leading-relaxed">${post.description}</p>
           ${post.tags && post.tags.length > 0 ? `
-            <div class="mt-2 flex flex-wrap gap-1">
-              ${post.tags.map((tag: any) => `<span class="text-xs px-2 py-1 bg-accent/10 text-accent rounded-full">#${tag}</span>`).join('')}
+            <div class="mt-3 flex flex-wrap gap-1">
+              ${post.tags.map((tag: any) => `<span class="text-xs px-2 py-1 bg-accent/10 text-accent rounded-full break-words">#${tag}</span>`).join('')}
             </div>
           ` : ''}
         </li>
@@ -233,12 +262,27 @@ const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
     }
 
     if (html) {
-      container.innerHTML = html;
-      // Add HR after dynamic posts if there are static posts
-      const staticSections = document.querySelector('#featured, #recent-posts');
-      if (staticSections) {
-        container.innerHTML += '<hr class="border-border my-8">';
-      }
+      // Smoothly update the container
+      container.style.opacity = '0';
+      container.style.transition = 'opacity 0.3s ease';
+      
+      setTimeout(() => {
+        container.innerHTML = html;
+        container.style.opacity = '1';
+        
+        // Add HR after dynamic posts if there are static posts
+        const staticSections = document.querySelector('#featured, #recent-posts');
+        if (staticSections) {
+          container.innerHTML += '<hr class="border-border my-8">';
+        }
+      }, 150);
+    } else {
+      // Hide container smoothly if no posts
+      container.style.opacity = '0';
+      setTimeout(() => {
+        container.innerHTML = '';
+        container.style.opacity = '1';
+      }, 150);
     }
   }
 
@@ -259,4 +303,61 @@ const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
   
   // Also check for posts every 2 seconds (fallback)
   setInterval(displayDynamicPosts, 2000);
+  
+  // Function to view dynamic post content
+  function viewDynamicPost(postId: string) {
+    const posts = localStorage.getItem('blog_posts');
+    if (!posts) return;
+    
+    const blogPosts = JSON.parse(posts);
+    const post = blogPosts.find((p: any) => p.id === postId);
+    
+    if (!post) return;
+    
+    // Create modal to display post
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        document.body.removeChild(modal);
+      }
+    };
+    
+    const content = document.createElement('div');
+    content.className = 'bg-background border border-border rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto';
+    
+    const formattedDate = new Date(post.createdAt).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    
+    content.innerHTML = `
+      <div class="flex justify-between items-start mb-4">
+        <div>
+          <h1 class="text-2xl font-bold text-foreground mb-2">${post.title}</h1>
+          <div class="text-sm text-foreground/70 mb-4">
+            ${formattedDate} • by ${post.author}
+            ${post.featured ? ' • <span class="text-accent font-medium">Featured</span>' : ''}
+          </div>
+          <p class="text-foreground/80 mb-4">${post.description}</p>
+        </div>
+        <button onclick="this.closest('.fixed').remove()" class="text-foreground/60 hover:text-foreground text-xl">&times;</button>
+      </div>
+      <div class="prose prose-sm max-w-none text-foreground">
+        ${post.content.replace(/\n/g, '<br>')}
+      </div>
+      ${post.tags && post.tags.length > 0 ? `
+        <div class="mt-6 flex flex-wrap gap-2">
+          ${post.tags.map((tag: string) => `<span class="text-xs px-2 py-1 bg-accent/10 text-accent rounded-full">#${tag}</span>`).join('')}
+        </div>
+      ` : ''}
+    `;
+    
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+  }
+  
+  // Make function globally available
+  (window as any).viewDynamicPost = viewDynamicPost;
 </script>
